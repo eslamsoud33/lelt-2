@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الكنز - كنز ليلة الامتحان</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Amiri (For Poetry) -->
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .watermark-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-content: space-around;
+            overflow: hidden;
+            opacity: 0.08;
+        }
+
+        .watermark-text {
+            font-size: 3rem;
+            font-weight: 900;
+            transform: rotate(-45deg);
+            color: #000;
+            white-space: nowrap;
+            margin: 50px;
+        }
+
+        /* Poetry Styles */
+        .poetry-text {
+            font-family: 'Amiri', serif;
+            line-height: 2.2;
+            font-size: 1.4rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Header Logo Component ---
+        const HeaderLogo = ({ compact = false }) => (
+            <div className={`flex flex-col items-center justify-center animate-fade-in ${compact ? 'mb-4' : 'mb-8'}`}>
+                <div className={`bg-gradient-to-tr from-amber-400 to-amber-600 rounded-3xl shadow-xl transform hover:scale-105 transition-transform duration-300 ${compact ? 'p-3 mb-2' : 'p-4 mb-3'}`}>
+                    <svg xmlns="http://www.w3.org/2000/svg" className={`${compact ? 'h-10 w-10' : 'h-16 w-16'} text-white`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h1 className={`${compact ? 'text-3xl' : 'text-5xl md:text-7xl'} font-black text-slate-800 tracking-tighter mb-2 drop-shadow-sm`}>سلسلة الكنز</h1>
+                <div className={`flex items-center gap-2 font-bold text-slate-500 bg-white/50 rounded-full border border-slate-200 shadow-sm ${compact ? 'text-lg px-4 py-1' : 'text-xl md:text-2xl px-6 py-2'}`}>
+                    <span>إشراف:</span>
+                    <span className="text-amber-700">أ/ إسلام سعود</span>
+                </div>
+            </div>
+        );
+
+        // --- Question Formatter ---
+        const QuestionText = ({ text }) => {
+            if (text.includes('||')) {
+                const parts = text.split('||');
+                return (
+                    <div className="w-full text-center mb-6">
+                        <div className="inline-block bg-slate-50/50 p-4 rounded-2xl border border-slate-200 shadow-sm">
+                            {parts.map((part, idx) => (
+                                <div key={idx} className={`poetry-text text-slate-800 font-bold ${idx % 2 === 0 ? 'text-right md:text-center' : 'text-left md:text-center'} md:inline-block md:w-1/2 md:px-4`}>
+                                    {part.trim()}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+            }
+            return <h2 className="text-xl md:text-2xl font-bold text-slate-800 mb-8 leading-relaxed">{text}</h2>;
+        };
+
+        // --- Data Structure ---
+        const unitsStructure = [
+            { 
+                id: 1, 
+                title: "الوحدة الأولى: الملامح الطبيعية لقارة إفريقيا", 
+                colorClass: "text-blue-700",
+                borderClass: "border-blue-500",
+                bgClass: "bg-blue-50",
+                lessons: [
+                    { id: '1-1', title: "الدرس الأول: قارة إفريقيا (الموقع والكشوف)", btnColor: "hover:border-blue-400 hover:text-blue-800" }, 
+                    { id: '1-2', title: "الدرس الثاني: مظاهر سطح قارة إفريقيا", btnColor: "hover:border-blue-400 hover:text-blue-800" }, 
+                    { id: '1-3', title: "الدرس الثالث: نهر النيل والحضارات القديمة", btnColor: "hover:border-blue-400 hover:text-blue-800" }
+                ] 
+            },
+            { 
+                id: 2, 
+                title: "الوحدة الثانية: الحضارة المصرية وعلاقتها بإفريقيا", 
+                colorClass: "text-amber-700",
+                borderClass: "border-amber-500",
+                bgClass: "bg-amber-50",
+                lessons: [
+                    { id: '2-1', title: "الدرس الأول: عصر الدولة القديمة", btnColor: "hover:border-amber-400 hover:text-amber-800" }, 
+                    { id: '2-2', title: "الدرس الثاني: عصر الدولة الوسطى", btnColor: "hover:border-amber-400 hover:text-amber-800" }, 
+                    { id: '2-3', title: "الدرس الثالث: عصر الدولة الحديثة", btnColor: "hover:border-amber-400 hover:text-amber-800" }
+                ] 
+            },
+            { 
+                id: 3, 
+                title: "الوحدة الثالثة: النظم البيئية في قارة إفريقيا", 
+                colorClass: "text-green-700",
+                borderClass: "border-green-500",
+                bgClass: "bg-green-50",
+                lessons: [
+                    { id: '3-1', title: "الدرس الأول: الغابات", btnColor: "hover:border-green-400 hover:text-green-800" }, 
+                    { id: '3-2', title: "الدرس الثاني: الحشائش والصحاري", btnColor: "hover:border-green-400 hover:text-green-800" }, 
+                    { id: '3-3', title: "الدرس الثالث: البيئة المائية", btnColor: "hover:border-green-400 hover:text-green-800" }
+                ] 
+            },
+            { 
+                id: 4, 
+                title: "الوحدة الرابعة: مصر وإفريقيا (العصور الوسطى)", 
+                colorClass: "text-purple-700",
+                borderClass: "border-purple-500",
+                bgClass: "bg-purple-50",
+                lessons: [
+                    { id: '4-1', title: "الدرس الأول: انتشار الإسلام في إفريقيا", btnColor: "hover:border-purple-400 hover:text-purple-800" }, 
+                    { id: '4-2', title: "الدرس الثاني: التأثير الحضاري المتبادل", btnColor: "hover:border-purple-400 hover:text-purple-800" }
+                ] 
+            }
+        ];
+
+        // --- Question Database (Full Content) ---
+        const questionsDatabase = {
+            // --- UNIT 1 ---
+            '1-1': [
+                { type: 'mcq', id: 1, question: "أقرب نقطة يابس أوروبي لقارة إفريقيا تقع عند مضيق ......", options: ["باب المندب", "هرمز", "جبل طارق", "موزمبيق"], correctAnswer: "جبل طارق", rationale: "لأنه يفصل بين المغرب (إفريقيا) وإسبانيا (أوروبا)." },
+                { type: 'mcq', id: 2, question: "تمر دائرة ...... في النصف الجنوبي من قارة إفريقيا.", options: ["الاستواء", "السرطان", "الجدي", "القطبية"], correctAnswer: "الجدي", rationale: "مدار الجدي يمر في جنوب القارة." },
+                { type: 'essay', id: 3, question: "ما النتائج المترتبة على: امتداد قارة إفريقيا عبر دوائر عرض متعددة.", modelAnswer: "أدى ذلك إلى تنوع الأقاليم المناخية والنباتية في القارة." },
+                { type: 'mcq', id: 4, question: "يحد قارة إفريقيا من الغرب المحيط ......", options: ["الهندي", "الأطلنطي", "الهادي", "المتجمد"], correctAnswer: "الأطلنطي", rationale: "الحد الغربي للقارة." },
+                { type: 'mcq', id: 5, question: "السبب الجوهري لتقسيم إفريقيا لـ 54 دولة هو ......", options: ["التنوع المناخي", "الاستعمار الأوروبي", "كثرة الجبال", "النزاعات"], correctAnswer: "الاستعمار الأوروبي", rationale: "لضمان السيطرة ونهب الثروات." },
+                { type: 'essay', id: 6, question: "بم تفسر: التقسيم السياسي الحالي لقارة إفريقيا.", modelAnswer: "بسبب الاستعمار الأوروبي الذي قسم القارة لنهب خيراتها." },
+                { type: 'mcq', id: 7, question: "تعد شبه جزيرة سيناء ...... لانتقال الحضارات.", options: ["حاجزاً", "بوابة", "سداً", "نهاية"], correctAnswer: "بوابة", rationale: "بوابة عبور المؤثرات من آسيا." },
+                { type: 'essay', id: 8, question: "ما العلاقة بين شبه جزيرة سيناء والأمن القومي الإفريقي.", modelAnswer: "هي البوابة الشرقية التي عبرت منها الهجرات والحملات، فتأمينها ضروري لأمن القارة." },
+                { type: 'mcq', id: 9, question: "من الرحالة المصريين في الدولة القديمة ......", options: ["نخاو", "حرخوف", "أحمس", "رمسيس"], correctAnswer: "حرخوف", rationale: "أمير الرحالة، قام بـ 4 رحلات." },
+                { type: 'essay', id: 10, question: "دلل: لمصر دور ريادي في اكتشاف إفريقيا قديماً.", modelAnswer: "رحلات حرخوف ورحلة نخاو للدوران حول إفريقيا." },
+                { type: 'mcq', id: 11, question: "نجح الرحالة ...... في الوصول لغرب إفريقيا عبر الصحراء.", options: ["ابن بطوطة", "المسعودي", "الإدريسي", "فاسكو دا جاما"], correctAnswer: "ابن بطوطة", rationale: "وصل لمالي عبر الصحراء." },
+                { type: 'mcq', id: 12, question: "بدأت الكشوف الحديثة على يد دولة ......", options: ["فرنسا", "إنجلترا", "البرتغال", "إسبانيا"], correctAnswer: "البرتغال", rationale: "بقيادة هنري الملاح." },
+                { type: 'essay', id: 13, question: "قارن بين دوافع الكشوف المصرية القديمة والأوروبية الحديثة.", modelAnswer: "المصرية: تجارية واستكشافية. الأوروبية: استعمارية لنهب الموارد." },
+                { type: 'mcq', id: 14, question: "وصلت كشوف محمد علي باشا إلى ......", options: ["منابع النيل", "رأس الرجاء الصالح", "غرب إفريقيا", "تونس"], correctAnswer: "منابع النيل", rationale: "اكتشف النيل الأبيض." },
+                { type: 'mcq', id: 15, question: "يفصل البحر الأحمر إفريقيا عن ......", options: ["أوروبا", "آسيا", "أستراليا", "أمريكا"], correctAnswer: "آسيا", rationale: "الفاصل الشرقي." },
+                { type: 'mcq', id: 16, question: "أكبر دول إفريقيا مساحة هي ......", options: ["السودان", "الجزائر", "الكونغو", "مصر"], correctAnswer: "الجزائر", rationale: "الأولى حالياً." },
+                { type: 'mcq', id: 17, question: "جزيرة إفريقية في المحيط الهندي ......", options: ["صقلية", "مدغشقر", "القمر", "الكناري"], correctAnswer: "مدغشقر", rationale: "أكبر الجزر." },
+                { type: 'mcq', id: 18, question: "من الآثار السلبية للاستعمار ......", options: ["توحيد اللغات", "نهب الثروات", "بناء المدن", "التعليم"], correctAnswer: "نهب الثروات", rationale: "استنزاف الموارد." },
+                { type: 'mcq', id: 19, question: "دولة حبيسة في إفريقيا ......", options: ["مصر", "ليبيا", "تشاد", "المغرب"], correctAnswer: "تشاد", rationale: "لا تطل على بحر." },
+                { type: 'mcq', id: 20, question: "مساحة إفريقيا تبلغ ...... مليون كم2.", options: ["30.4", "44", "24", "10"], correctAnswer: "30.4", rationale: "ثاني القارات." },
+                { type: 'essay', id: 21, question: "استنتج: صعوبة توغل الرحالة قديماً في قلب إفريقيا.", modelAnswer: "بسبب العوائق الطبيعية كالصحراء الكبرى والغابات الكثيفة." },
+                { type: 'essay', id: 22, question: "ماذا يحدث إذا: لم يكتشف البرتغاليون رأس الرجاء الصالح.", modelAnswer: "لاستمرت التجارة عبر مصر، ولتأخر الاستعمار الأوروبي." },
+                { type: 'essay', id: 23, question: "أيد بالأدلة: دور العرب في جغرافية إفريقيا.", modelAnswer: "كتابات المسعودي وابن بطوطة وصفت القارة بدقة." },
+                { type: 'essay', id: 24, question: "وضح: أهمية موقع مصر لإفريقيا.", modelAnswer: "بوابة شمالية شرقية وتتحكم في قناة السويس." },
+                { type: 'essay', id: 25, question: "رأيك: كيف نحقق نهضة إفريقية.", modelAnswer: "بالتكامل الاقتصادي وحل النزاعات واستثمار الموارد." },
+                { type: 'mcq', id: 26, question: "تقع جبال أطلس في ......", options: ["شمال غرب", "شمال شرق", "جنوب غرب", "جنوب شرق"], correctAnswer: "شمال غرب", rationale: "المغرب العربي." },
+                { type: 'mcq', id: 27, question: "زار المسعودي إفريقيا وكتب عنها، وهو رحالة ......", options: ["عربي", "أوروبي", "صيني", "هندي"], correctAnswer: "عربي", rationale: "من أشهر الجغرافيين العرب." },
+                { type: 'essay', id: 28, question: "ما العلاقة: الموقع الفلكي والنبات الطبيعي.", modelAnswer: "تنوع دوائر العرض أدى لتنوع المناخ وبالتالي تنوع النبات." },
+                { type: 'essay', id: 29, question: "بم تفسر: أهمية مضيق باب المندب.", modelAnswer: "مدخل البحر الأحمر الجنوبي وممر تجاري عالمي." },
+                { type: 'essay', id: 30, question: "دلل: تعدد محاولات الدوران حول إفريقيا.", modelAnswer: "بدأت بنخاو قديماً وانتهت بالبرتغاليين حديثاً." }
+            ],
+            
+            '1-2': [
+                { type: 'mcq', id: 1, question: "جبال البحر الأحمر نشأت نتيجة ......", options: ["التواءات", "انكسارات", "براكين", "تتعرية"], correctAnswer: "انكسارات", rationale: "الأخدود الإفريقي." },
+                { type: 'essay', id: 2, question: "بم تفسر: الجليد فوق كليمنجارو رغم الحرارة.", modelAnswer: "بسبب الارتفاع الشاهق (5895م)، فالحرارة تقل بالارتفاع." },
+                { type: 'mcq', id: 3, question: "هضبة ...... منبع موسمي للنيل.", options: ["البحيرات", "الحبشة", "الشطوط", "الصحراء"], correctAnswer: "الحبشة", rationale: "أمطار صيفية." },
+                { type: 'mcq', id: 4, question: "المنبع الدائم للنيل هو هضبة ......", options: ["إثيوبيا", "البحيرات", "الشمالية", "الجنوبية"], correctAnswer: "البحيرات", rationale: "أمطار طوال العام." },
+                { type: 'essay', id: 5, question: "قارن: هضبة البحيرات والحبشة (المطر).", modelAnswer: "البحيرات: طوال العام. الحبشة: صيفي." },
+                { type: 'mcq', id: 6, question: "تضيق السهول الساحلية بسبب ......", options: ["الشعاب", "اقتراب الجبال", "المستنقعات", "المد والجزر"], correctAnswer: "اقتراب الجبال", rationale: "مثل جبال البحر الأحمر." },
+                { type: 'essay', id: 7, question: "ما النتائج: اقتراب الجبال من الساحل.", modelAnswer: "ضيق السهول الساحلية وصعوبة الاتصال بالداخل." },
+                { type: 'mcq', id: 8, question: "توجد الواحات في هضبة ......", options: ["الصحراء الكبرى", "الحبشة", "البحيرات", "الجنوب"], correctAnswer: "الصحراء الكبرى", rationale: "منخفضات خصبة." },
+                { type: 'mcq', id: 9, question: "يسود المظهر ...... سطح إفريقيا.", options: ["السهلي", "الهضبي", "الجبلي", "الجليدي"], correctAnswer: "الهضبي", rationale: "مساحات واسعة." },
+                { type: 'mcq', id: 10, question: "أعلى قمة في إفريقيا ......", options: ["كينيا", "كليمنجارو", "توبقال", "دراكيزبرج"], correctAnswer: "كليمنجارو", rationale: "في تنزانيا." },
+                { type: 'mcq', id: 11, question: "جبال أطلس جبال ......", options: ["التوائية", "انكسارية", "بركانية", "رسوبية"], correctAnswer: "التوائية", rationale: "في الشمال الغربي." },
+                { type: 'mcq', id: 12, question: "نهر الكونغو يجري في الغابات ......", options: ["الاستوائية", "الموسمية", "النفضية", "الصنوبرية"], correctAnswer: "الاستوائية", rationale: "ممطرة طوال العام." },
+                { type: 'mcq', id: 13, question: "يصب نهر النيجر في ......", options: ["المتوسط", "خليج غينيا", "الأحمر", "الهندي"], correctAnswer: "خليج غينيا", rationale: "الأطلنطي." },
+                { type: 'mcq', id: 14, question: "جبال دراكنزبرج تقع في ......", options: ["الشمال", "الجنوب الشرقي", "الغرب", "الوسط"], correctAnswer: "الجنوب الشرقي", rationale: "أقصى الجنوب." },
+                { type: 'mcq', id: 15, question: "هضبة الشطوط تقع بين جبال ......", options: ["البحر الأحمر", "أطلس", "كينيا", "التبستي"], correctAnswer: "أطلس", rationale: "في الجزائر." },
+                { type: 'mcq', id: 16, question: "نهر أورانج يقطع هضبة ......", options: ["الشمال", "الجنوب", "الحبشة", "البحيرات"], correctAnswer: "الجنوب", rationale: "جنوب إفريقيا." },
+                { type: 'mcq', id: 17, question: "سهول النيل الفيضية تتميز بـ ......", options: ["الرمال", "الخصوبة", "الملوحة", "الحجارة"], correctAnswer: "الخصوبة", rationale: "تكونت من الطمي." },
+                { type: 'mcq', id: 18, question: "تضيق السواحل عند البحر الأحمر لاقتراب ......", options: ["الجبال", "الهضاب", "الرمال", "الغابات"], correctAnswer: "الجبال", rationale: "سلاسل البحر الأحمر." },
+                { type: 'mcq', id: 19, question: "تنتشر المنخفضات في الصحراء ......", options: ["الشرقية", "الكبرى", "كالهاري", "ناميب"], correctAnswer: "الكبرى", rationale: "شمال القارة." },
+                { type: 'mcq', id: 20, question: "يفصل موزمبيق جزيرة ......", options: ["مدغشقر", "القمر", "الكناري", "صقلية"], correctAnswer: "مدغشقر", rationale: "عن القارة." },
+                { type: 'essay', id: 21, question: "دلل: تنوع الجبال في إفريقيا.", modelAnswer: "التوائية (أطلس)، انكسارية (البحر الأحمر)، بركانية (كينيا)." },
+                { type: 'essay', id: 22, question: "ما العلاقة: الحبشة وزراعة مصر.", modelAnswer: "الحبشة مصدر الطمي والمياه في موسم الفيضان." },
+                { type: 'essay', id: 23, question: "استنتج: أهمية السهول الفيضية.", modelAnswer: "قيام الزراعة وتركز السكان." },
+                { type: 'essay', id: 24, question: "ماذا يحدث إذا: خلت إفريقيا من الأنهار.", modelAnswer: "لأصبحت صحراء قاحلة وصعبت الحياة." },
+                { type: 'essay', id: 25, question: "فسر: أهمية الاقتصاد الأزرق.", modelAnswer: "استثمار الموارد المائية للتنمية المستدامة." },
+                { type: 'essay', id: 26, question: "حدد: أثر الأخدود الإفريقي.", modelAnswer: "كون جبالاً انكسارية وبحيرات طولية." },
+                { type: 'essay', id: 27, question: "تخيل: إفريقيا بلا هضاب.", modelAnswer: "لارتفعت الحرارة وتغير نظام المطر والأنهار." },
+                { type: 'mcq', id: 28, question: "منخفض القطارة في دولة ......", options: ["ليبيا", "مصر", "تونس", "الجزائر"], correctAnswer: "مصر", rationale: "صحراء مصر الغربية." },
+                { type: 'mcq', id: 29, question: "أهمية سهول البحر الأحمر ......", options: ["الزراعة", "التعدين", "الرعي", "الصيد"], correctAnswer: "التعدين", rationale: "معادن وبترول." },
+                { type: 'mcq', id: 30, question: "جبال أطلس جبال ......", options: ["التوائية", "انكسارية", "بركانية", "رسوبية"], correctAnswer: "التوائية", rationale: "نشأة جيولوجية." }
+            ],
+
+            '1-3': [
+                { type: 'mcq', id: 1, question: "أكثر منطقة يفقد فيها النيل مياهه ......", options: ["الحبشة", "السدود النباتية", "الشمال", "المصب"], correctAnswer: "السدود النباتية", rationale: "بحر الجبل (مستنقعات وبخر)." },
+                { type: 'mcq', id: 2, question: "تجمع 'الأندوجو' يضم دول ......", options: ["المغرب", "الغرب", "حوض النيل", "القرن"], correctAnswer: "حوض النيل", rationale: "للإخاء والتعاون." },
+                { type: 'mcq', id: 3, question: "عاصمة كوش الثانية (الحديد) ......", options: ["نبتة", "مروي", "طيبة", "كرما"], correctAnswer: "مروي", rationale: "اشتهرت بالحديد." },
+                { type: 'mcq', id: 4, question: "حضارة قرطاج حضارة ......", options: ["زراعية", "تجارية", "رعوية", "صناعية"], correctAnswer: "تجارية", rationale: "بحرية فينيقية." },
+                { type: 'mcq', id: 5, question: "اتفاقية 1929 أعطت مصر حق ......", options: ["الفيتو", "البناء", "البيع", "التغيير"], correctAnswer: "الفيتو", rationale: "الاعتراض على المشروعات." },
+                { type: 'mcq', id: 6, question: "بداية النيل الحقيقية نهر ......", options: ["كاجيرا", "السوباط", "عطبرة", "الأزرق"], correctAnswer: "كاجيرا", rationale: "يصب في فيكتوريا." },
+                { type: 'mcq', id: 7, question: "ساهمت مصر في خزان ...... بالسودان.", options: ["أوين", "جبل الأولياء", "أسوان", "تانا"], correctAnswer: "جبل الأولياء", rationale: "لتنظيم الري." },
+                { type: 'mcq', id: 8, question: "رافد موسمي شمال الخرطوم ......", options: ["عطبرة", "سمليكي", "بحر العرب", "كاجيرا"], correctAnswer: "عطبرة", rationale: "آخر الروافد." },
+                { type: 'mcq', id: 9, question: "تأثرت كوش بمصر في بناء ......", options: ["الأهرامات", "السفن", "القلاع", "القصور"], correctAnswer: "الأهرامات", rationale: "مقابر الملوك." },
+                { type: 'mcq', id: 10, question: "حضارة أكسوم في ...... حالياً.", options: ["مصر", "إثيوبيا", "تونس", "الصومال"], correctAnswer: "إثيوبيا", rationale: "الحبشة." },
+                { type: 'mcq', id: 11, question: "طهرت مصر بحيرة فيكتوريا من ......", options: ["الحشائش", "الرمال", "الصخور", "الأسماك"], correctAnswer: "الحشائش", rationale: "لتحسين التدفق والملاحة." },
+                { type: 'mcq', id: 12, question: "التقاء النيلين في ......", options: ["جوبا", "الخرطوم", "أسوان", "ملكال"], correctAnswer: "الخرطوم", rationale: "الأزرق والأبيض." },
+                { type: 'mcq', id: 13, question: "حضارة لم تعتمد على النيل ......", options: ["المصرية", "كوش", "نبتة", "قرطاج"], correctAnswer: "قرطاج", rationale: "تجارية متوسطية." },
+                { type: 'mcq', id: 14, question: "صادرات أكسوم ......", options: ["الغاز", "البخور والعاج", "السيارات", "القمح"], correctAnswer: "البخور والعاج", rationale: "سلع ثمينة." },
+                { type: 'mcq', id: 15, question: "مساحة حوض النيل ......% من القارة.", options: ["10", "20", "30", "40"], correctAnswer: "10", rationale: "عشر القارة." },
+                { type: 'mcq', id: 16, question: "مبادئ 2015 ركزت على ......", options: ["الضرر", "عدم الضرر", "البيع", "التقسيم"], correctAnswer: "عدم الضرر", rationale: "حول سد النهضة." },
+                { type: 'mcq', id: 17, question: "سد أوين يولد ......", options: ["الكهرباء", "الرياح", "الشمس", "الفحم"], correctAnswer: "الكهرباء", rationale: "طاقة نظيفة." },
+                { type: 'mcq', id: 18, question: "عاصمة كوش الأولى ......", options: ["نبتة", "مروي", "قرطاج", "أكسوم"], correctAnswer: "نبتة", rationale: "قبل مروي." },
+                { type: 'mcq', id: 19, question: "اقتصاد بيئي مستدام ......", options: ["أزرق", "أخضر", "أحمر", "أسود"], correctAnswer: "أخضر", rationale: "صديق للبيئة." },
+                { type: 'mcq', id: 20, question: "إله مصري كوشي ......", options: ["آمون", "زيوس", "بعل", "مردخاي"], correctAnswer: "آمون", rationale: "رمز ديني مشترك." },
+                { type: 'essay', id: 21, question: "بم تفسر: أهمية كاجيرا.", modelAnswer: "البداية الحقيقية للنيل ومغذي فيكتوريا." },
+                { type: 'essay', id: 22, question: "ما النتائج: مستنقعات بحر الجبل.", modelAnswer: "ضياع نصف إيراد النيل بالبخر." },
+                { type: 'essay', id: 23, question: "دلل: التأثير المصري في كوش.", modelAnswer: "بناء أهرامات وعبادة آمون." },
+                { type: 'essay', id: 24, question: "ما العلاقة: الفينيقيون وقرطاج.", modelAnswer: "هم المؤسسون لها كمحطة تجارية." },
+                { type: 'essay', id: 25, question: "استنتج: تمسك مصر بمياه النيل.", modelAnswer: "لأنه المصدر الوحيد للحياة في مصر الصحراوية." },
+                { type: 'essay', id: 26, question: "ماذا يحدث إذا: غاب التعاون في الحوض.", modelAnswer: "نزاعات وفقر مائي." },
+                { type: 'essay', id: 27, question: "فسر: ازدهار أكسوم.", modelAnswer: "موقع تجاري استراتيجي على البحر الأحمر." },
+                { type: 'essay', id: 28, question: "حدد: دور مصر التنموي.", modelAnswer: "بناء السدود وحفر الآبار في دول الحوض." },
+                { type: 'essay', id: 29, question: "قارن: الاقتصاد الأخضر والأزرق.", modelAnswer: "الأخضر: بيئي بري. الأزرق: مائي بحري." },
+                { type: 'essay', id: 30, question: "أيد: النيل شريان تواصل.", modelAnswer: "نقل البشر والحضارة من الشمال للجنوب والعكس." }
+            ],
+
+            // --- UNIT 2 ---
+            '2-1': [
+                 { type: 'mcq', id: 1, question: "عاصمة مصر في الدولة القديمة ......", options: ["منف", "طيبة", "نخن", "أواريس"], correctAnswer: "منف", rationale: "بناها مينا." },
+                 { type: 'mcq', id: 2, question: "أمير الرحالة في الدولة القديمة ......", options: ["حرخوف", "وني", "سنوهي", "أحمس"], correctAnswer: "حرخوف", rationale: "وصل لليام." },
+                 { type: 'mcq', id: 3, question: "عصر الدولة القديمة هو عصر ......", options: ["الأهرامات", "المجد الحربي", "الرخاء", "الاضمحلال"], correctAnswer: "الأهرامات", rationale: "لكثرتها." },
+                 { type: 'mcq', id: 4, question: "سقطت الدولة القديمة بعد الملك ......", options: ["بيبي الثاني", "خوفو", "زوسر", "سنفرو"], correctAnswer: "بيبي الثاني", rationale: "ضعف الحكم." },
+                 { type: 'mcq', id: 5, question: "أرسل سنفرو أسطولاً لـ ......", options: ["فينيقيا", "بونت", "نوبة", "ليبيا"], correctAnswer: "فينيقيا", rationale: "لجلب الأرز." },
+                 { type: 'mcq', id: 6, question: "نبتة مركز حضاري في ......", options: ["السودان", "مصر", "ليبيا", "الجزائر"], correctAnswer: "السودان", rationale: "شمال السودان." },
+                 { type: 'mcq', id: 7, question: "طريق بري لقلب إفريقيا ......", options: ["درب الأربعين", "النيل", "البحر", "الجو"], correctAnswer: "درب الأربعين", rationale: "طريق قوافل." },
+                 { type: 'mcq', id: 8, question: "أول بناء حجري ......", options: ["هرم زوسر", "خوفو", "أبو الهول", "الكرنك"], correctAnswer: "هرم زوسر", rationale: "بسقارة." },
+                 { type: 'mcq', id: 9, question: "علاقة مصر والسودان قديماً ......", options: ["تجارية", "حرب", "عزلة", "قطيعة"], correctAnswer: "تجارية", rationale: "تبادل منتجات." },
+                 { type: 'mcq', id: 10, question: "باني أبو الهول ......", options: ["خفرع", "خوفو", "منكاورع", "زوسر"], correctAnswer: "خفرع", rationale: "صاحب الهرم الثاني." },
+                 { type: 'mcq', id: 11, question: "استوردت مصر من الجنوب ......", options: ["البخور والعاج", "القمح", "الحديد", "الورق"], correctAnswer: "البخور والعاج", rationale: "سلع فاخرة." },
+                 { type: 'mcq', id: 12, question: "تماثيل الدولة القديمة من ......", options: ["الصخور", "الخشب", "الطين", "القش"], correctAnswer: "الصخور", rationale: "للخلود." },
+                 { type: 'mcq', id: 13, question: "نهاية الدولة القديمة الأسرة ......", options: ["6", "4", "5", "3"], correctAnswer: "6", rationale: "بعد بيبي الثاني." },
+                 { type: 'mcq', id: 14, question: "مهندس هرم زوسر ......", options: ["إيمحتب", "حم إيونو", "حرخوف", "بتاح"], correctAnswer: "إيمحتب", rationale: "الوزير الطبيب." },
+                 { type: 'mcq', id: 15, question: "حكم 94 عاماً ......", options: ["بيبي الثاني", "رمسيس", "تحتمس", "مينا"], correctAnswer: "بيبي الثاني", rationale: "أطول حكم." },
+                 { type: 'mcq', id: 16, question: "الدولة القديمة تميزت بـ ......", options: ["الاستقرار", "الفوضى", "الضعف", "الاحتلال"], correctAnswer: "الاستقرار", rationale: "قوة مركزية." },
+                 { type: 'mcq', id: 17, question: "اهتمت مصر بـ ...... عبر حرخوف.", options: ["إفريقيا", "أوروبا", "آسيا", "أمريكا"], correctAnswer: "إفريقيا", rationale: "الجنوب." },
+                 { type: 'mcq', id: 18, question: "وظيفة الأهرامات ......", options: ["مقابر", "قصور", "معابد", "مخازن"], correctAnswer: "مقابر", rationale: "حفظ الموتى." },
+                 { type: 'mcq', id: 19, question: "لقب رئيس بعثات الجنوب ......", options: ["حاكم الجنوب", "الوزير", "الكاتب", "الكاهن"], correctAnswer: "حاكم الجنوب", rationale: "منصب رفيع." },
+                 { type: 'mcq', id: 20, question: "المادة الخام لتماثيل خفرع ......", options: ["الديوريت", "الذهب", "الخشب", "الطين"], correctAnswer: "الديوريت", rationale: "صلب جداً." },
+                 { type: 'essay', id: 21, question: "وضح: دور حرخوف.", modelAnswer: "استكشاف وتجارة مع إفريقيا." },
+                 { type: 'essay', id: 22, question: "بم تفسر: بناء الأهرامات.", modelAnswer: "إيمان بالبعث والخلود." },
+                 { type: 'essay', id: 23, question: "دلل: علاقات مصرية إفريقية قديمة.", modelAnswer: "رحلات حرخوف وتبادل الهدايا." },
+                 { type: 'essay', id: 24, question: "ما النتائج: ضعف بيبي الثاني.", modelAnswer: "سقوط الدولة القديمة." },
+                 { type: 'essay', id: 25, question: "ما العلاقة: النيل والأهرامات.", modelAnswer: "نقل الأحجار وقت الفيضان." },
+                 { type: 'essay', id: 26, question: "استنتج: عدم التوسع العسكري قديماً.", modelAnswer: "الاهتمام بالبناء والاستقرار." },
+                 { type: 'essay', id: 27, question: "قارن: زوسر وسنفرو.", modelAnswer: "زوسر: هرم مدرج. سنفرو: أهرام دهشور وتجارة." },
+                 { type: 'essay', id: 28, question: "ماذا يحدث إذا: لم يؤمنوا بالبعث.", modelAnswer: "ما بنوا أهرامات." },
+                 { type: 'essay', id: 29, question: "رأيك: في السياحة الأثرية.", modelAnswer: "مصدر هام للدخل يجب تطويره." },
+                 { type: 'essay', id: 30, question: "فسر: عصر بناة الأهرامات.", modelAnswer: "لكثرة الأهرامات المبنية." }
+            ],
+            '2-2': [
+                 { type: 'mcq', id: 1, question: "الدولة الوسطى عصر ......", options: ["الرخاء الاقتصادي", "الحرب", "الأهرام", "الضعف"], correctAnswer: "الرخاء الاقتصادي", rationale: "مشروعات زراعية وتجارية." },
+                 { type: 'mcq', id: 2, question: "حفر قناة سيزوستريس الملك ......", options: ["سنوسرت الثالث", "أمنمحات", "أحمس", "خوفو"], correctAnswer: "سنوسرت الثالث", rationale: "ربط البحرين." },
+                 { type: 'mcq', id: 3, question: "قلاع النوبة ......", options: ["سمنة وقمنة", "بوهين", "يافا", "مجدو"], correctAnswer: "سمنة وقمنة", rationale: "تأمين الجنوب." },
+                 { type: 'mcq', id: 4, question: "عاصمة الوسطى ......", options: ["إثيت تاوي", "طيبة", "منف", "أواريس"], correctAnswer: "إثيت تاوي", rationale: "بالفيوم." },
+                 { type: 'mcq', id: 5, question: "سد اللاهون بناه ......", options: ["أمنمحات الثالث", "سنوسرت", "أحمس", "مينا"], correctAnswer: "أمنمحات الثالث", rationale: "للري بالفيوم." },
+                 { type: 'mcq', id: 6, question: "غزا مصر ......", options: ["الهكسوس", "الفرس", "الرومان", "اليونان"], correctAnswer: "الهكسوس", rationale: "نهاية الدولة الوسطى." },
+                 { type: 'mcq', id: 7, question: "سيزوستريس زادت التجارة مع ......", options: ["بونت", "آسيا", "أوروبا", "الكل"], correctAnswer: "الكل", rationale: "ربطت البحار." },
+                 { type: 'mcq', id: 8, question: "عاصمة الهكسوس ......", options: ["أواريس", "طيبة", "منف", "نخن"], correctAnswer: "أواريس", rationale: "الشرقية حالياً." },
+                 { type: 'mcq', id: 9, question: "كافح الهكسوس أمراء ......", options: ["طيبة", "منف", "أهناسيا", "سايس"], correctAnswer: "طيبة", rationale: "الجنوب." },
+                 { type: 'mcq', id: 10, question: "شجعت أحمس ......", options: ["إياح حتب", "حتشبسوت", "نفرتاري", "تي"], correctAnswer: "إياح حتب", rationale: "أمه." },
+                 { type: 'mcq', id: 11, question: "مؤسس الأسرة 12 ......", options: ["أمنمحات الأول", "سنوسرت", "منتحوتب", "أحمس"], correctAnswer: "أمنمحات الأول", rationale: "كان وزيراً." },
+                 { type: 'mcq', id: 12, question: "وحد البلاد في الوسطى ......", options: ["منتحوتب الثاني", "أمنمحات", "بيبي", "خوفو"], correctAnswer: "منتحوتب الثاني", rationale: "بعد الفوضى." },
+                 { type: 'mcq', id: 13, question: "سلاح أحمس ......", options: ["العجلات الحربية", "السيف", "الرمح", "القوس"], correctAnswer: "العجلات الحربية", rationale: "تكنولوجيا الهكسوس." },
+                 { type: 'mcq', id: 14, question: "مقياس النيل لتحديد ......", options: ["الضرائب", "الوقت", "السكان", "النجوم"], correctAnswer: "الضرائب", rationale: "حسب الفيضان." },
+                 { type: 'mcq', id: 15, question: "اهتمام بالنوبة لـ ......", options: ["تأمين وتجارة", "سياحة", "صيد", "نزهة"], correctAnswer: "تأمين وتجارة", rationale: "بعد استراتيجي." },
+                 { type: 'mcq', id: 16, question: "سبب احتلال الهكسوس ......", options: ["ضعف الملوك", "قوتهم", "خيانة", "فقر"], correctAnswer: "ضعف الملوك", rationale: "وانقسام البلاد." },
+                 { type: 'mcq', id: 17, question: "تجارة مع كريت عبر ......", options: ["المتوسط", "الأحمر", "النيل", "الصحراء"], correctAnswer: "المتوسط", rationale: "بحر الشمال." },
+                 { type: 'mcq', id: 18, question: "أهم وظيفة ......", options: ["الكاتب", "الجندي", "الفلاح", "التاجر"], correctAnswer: "الكاتب", rationale: "للمناصب العليا." },
+                 { type: 'mcq', id: 19, question: "أول شهيد ضد الهكسوس ......", options: ["سقنن رع", "كامس", "أحمس", "تحتمس"], correctAnswer: "سقنن رع", rationale: "الأب." },
+                 { type: 'mcq', id: 20, question: "عصر الضعف يسمى ......", options: ["اضمحلال", "قوة", "ازدهار", "نهضة"], correctAnswer: "اضمحلال", rationale: "انتقال." },
+                 { type: 'essay', id: 21, question: "بم تفسر: الرخاء الاقتصادي للوسطى.", modelAnswer: "بسبب المشروعات الاقتصادية الكبرى." },
+                 { type: 'essay', id: 22, question: "ما النتائج: قناة سيزوستريس.", modelAnswer: "زيادة التجارة مع إفريقيا والمتوسط." },
+                 { type: 'essay', id: 23, question: "دلل: دور المرأة الوطنية.", modelAnswer: "إياح حتب وتشجيعها لأسرتها." },
+                 { type: 'essay', id: 24, question: "ما العلاقة: سد اللاهون والزراعة.", modelAnswer: "استصلاح الفيوم وزيادة المحاصيل." },
+                 { type: 'essay', id: 25, question: "استنتج: بناء قلاع النوبة.", modelAnswer: "لتأمين الحدود الجنوبية وطرق التجارة." },
+                 { type: 'essay', id: 26, question: "ماذا يحدث إذا: لم يستخدم أحمس العجلات.", modelAnswer: "لما انتصر على الهكسوس بسهولة." },
+                 { type: 'essay', id: 27, question: "فسر: كراهية الهكسوس.", modelAnswer: "لظلمهم وتخريبهم للمعابد." },
+                 { type: 'essay', id: 28, question: "قارن: أمنمحات الأول وسنوسرت الثالث.", modelAnswer: "أمنمحات: عاصمة. سنوسرت: قناة وقلاع." },
+                 { type: 'essay', id: 29, question: "وضح: درس الهكسوس.", modelAnswer: "أهمية الجيش والتسليح والوحدة." },
+                 { type: 'essay', id: 30, question: "أيد: النوبة عمق استراتيجي.", modelAnswer: "اهتمام الملوك بتأمينها وربطها بمصر." }
+            ],
+
+            '2-3': [
+                 { type: 'mcq', id: 1, question: "مؤسس الدولة الحديثة ......", options: ["أحمس", "تحتمس", "رمسيس", "أخناتون"], correctAnswer: "أحمس", rationale: "طرد الهكسوس." },
+                 { type: 'mcq', id: 2, question: "أقدم إمبراطورية ......", options: ["تحتمس الثالث", "رمسيس", "أحمس", "مينا"], correctAnswer: "تحتمس الثالث", rationale: "توسع كبير." },
+                 { type: 'mcq', id: 3, question: "رحلة بونت ......", options: ["حتشبسوت", "نفرتيتي", "تي", "إياح"], correctAnswer: "حتشبسوت", rationale: "تجارة سلمية." },
+                 { type: 'mcq', id: 4, question: "معركة مجدو ......", options: ["تحتمس الثالث", "رمسيس", "أحمس", "سيتي"], correctAnswer: "تحتمس الثالث", rationale: "ضد الآسيويين." },
+                 { type: 'mcq', id: 5, question: "أول سلام ......", options: ["رمسيس الثاني", "تحتمس", "أحمس", "سادات"], correctAnswer: "رمسيس الثاني", rationale: "مع الحيثيين." },
+                 { type: 'mcq', id: 6, question: "ثورة دينية ......", options: ["أخناتون", "توت", "رمسيس", "حورمحب"], correctAnswer: "أخناتون", rationale: "عبادة آتون." },
+                 { type: 'mcq', id: 7, question: "مقبرة كاملة ......", options: ["توت عنخ آمون", "خوفو", "رمسيس", "سيتي"], correctAnswer: "توت عنخ آمون", rationale: "اكتشاف 1922." },
+                 { type: 'mcq', id: 8, question: "هزم شعوب البحر ......", options: ["رمسيس الثالث", "الثاني", "الأول", "مرنبتاح"], correctAnswer: "رمسيس الثالث", rationale: "أنقذ مصر." },
+                 { type: 'mcq', id: 9, question: "بهو الكرنك ......", options: ["رمسيس الثاني", "تحتمس", "أحمس", "حتشبسوت"], correctAnswer: "رمسيس الثاني", rationale: "أكمله." },
+                 { type: 'mcq', id: 10, question: "عصر المجد الحربي ......", options: ["الحديثة", "القديمة", "الوسطى", "المتأخر"], correctAnswer: "الحديثة", rationale: "انتصارات وتوسع." },
+                 { type: 'mcq', id: 11, question: "معركة قادش ......", options: ["رمسيس الثاني", "تحتمس", "أحمس", "سيتي"], correctAnswer: "رمسيس الثاني", rationale: "ضد الحيثيين." },
+                 { type: 'mcq', id: 12, question: "عاصمة أخناتون ......", options: ["أخت آتون", "طيبة", "منف", "أواريس"], correctAnswer: "أخت آتون", rationale: "تل العمارنة." },
+                 { type: 'mcq', id: 13, question: "أعاد آمون ......", options: ["توت عنخ آمون", "أخناتون", "آي", "حورمحب"], correctAnswer: "توت عنخ آمون", rationale: "ضد آتون." },
+                 { type: 'mcq', id: 14, question: "إنقاذ أبو سمبل ......", options: ["اليونسكو", "الأمم المتحدة", "الفيفا", "الصحة"], correctAnswer: "اليونسكو", rationale: "آثار النوبة." },
+                 { type: 'mcq', id: 15, question: "حرب المفاجأة ......", options: ["تحتمس الثالث", "رمسيس", "أحمس", "خالد"], correctAnswer: "تحتمس الثالث", rationale: "عبقرية عسكرية." },
+                 { type: 'mcq', id: 16, question: "جلب البخور ......", options: ["بونت", "فينيقيا", "كريت", "قبرص"], correctAnswer: "بونت", rationale: "رحلة حتشبسوت." },
+                 { type: 'mcq', id: 17, question: "تأمين السواحل ......", options: ["أسطول", "قلاع", "خنادق", "أسوار"], correctAnswer: "أسطول", rationale: "رمسيس الثالث." },
+                 { type: 'mcq', id: 18, question: "مسلات الكرنك ......", options: ["حتشبسوت", "نفرتيتي", "تي", "كيلوباترا"], correctAnswer: "حتشبسوت", rationale: "علامة معمارية." },
+                 { type: 'mcq', id: 19, question: "نهاية الدولة ......", options: ["ضعف الملوك", "قوتهم", "ثراء", "توسع"], correctAnswer: "ضعف الملوك", rationale: "وسيطرة الكهنة." },
+                 { type: 'mcq', id: 20, question: "إله أخناتون ......", options: ["آتون", "آمون", "رع", "أوزيريس"], correctAnswer: "آتون", rationale: "قرص الشمس." },
+                 { type: 'essay', id: 21, question: "دلل: عبقرية تحتمس العسكرية.", modelAnswer: "تقسيم الجيش والمفاجأة." },
+                 { type: 'essay', id: 22, question: "ما العلاقة: حتشبسوت وبونت.", modelAnswer: "رحلات تجارية وتبادل سلع." },
+                 { type: 'essay', id: 23, question: "بم تفسر: عصر المجد الحربي.", modelAnswer: "كثرة الانتصارات والتوسع." },
+                 { type: 'essay', id: 24, question: "ما النتائج: ثورة أخناتون.", modelAnswer: "فوضى وضياع الإمبراطورية." },
+                 { type: 'essay', id: 25, question: "استنتج: أهمية السلام.", modelAnswer: "الاستقرار والبناء (رمسيس الثاني)." },
+                 { type: 'essay', id: 26, question: "ماذا يحدث إذا: هزم رمسيس الثالث.", modelAnswer: "احتلال مصر من شعوب البحر." },
+                 { type: 'essay', id: 27, question: "فسر: شهرة توت.", modelAnswer: "مقبرته وكنوزها." },
+                 { type: 'essay', id: 28, question: "قارن: مجدو وقادش.", modelAnswer: "تحتمس ضد آسيويين، رمسيس ضد حيثيين." },
+                 { type: 'essay', id: 29, question: "وضح: دور اليونسكو.", modelAnswer: "حماية التراث (أبو سمبل)." },
+                 { type: 'essay', id: 30, question: "أيد: تواصل مصري إفريقي.", modelAnswer: "تجارة وسيطرة جنوبية." }
+            ],
+
+            // --- UNIT 3 ---
+            '3-1': [
+                 { type: 'mcq', id: 1, question: "غابات الكونغو ......", options: ["استوائية", "مدارية", "نفضية", "صنوبرية"], correctAnswer: "استوائية", rationale: "حرارة ومطر دائم." },
+                 { type: 'mcq', id: 2, question: "أشجار استوائية ......", options: ["مطاط وكاكاو", "زيتون", "أرز", "نخيل"], correctAnswer: "مطاط وكاكاو", rationale: "أخشاب صلبة." },
+                 { type: 'mcq', id: 3, question: "حيوانات استوائية ......", options: ["قرود وزواحف", "أغنام", "جمال", "دببة"], correctAnswer: "قرود وزواحف", rationale: "متسلقة." },
+                 { type: 'mcq', id: 4, question: "غابات البحر المتوسط في ......", options: ["الشمال الغربي", "الوسط", "الشرق", "الجنوب"], correctAnswer: "الشمال الغربي", rationale: "المغرب العربي." },
+                 { type: 'mcq', id: 5, question: "أشجار متوسطية ......", options: ["بلوط فليني", "مطاط", "كاكاو", "ماهوجني"], correctAnswer: "البلوط الفليني", rationale: "دائمة الخضرة." },
+                 { type: 'mcq', id: 6, question: "غابات أقل كثافة ......", options: ["مدارية", "استوائية", "مطيرة", "كثيفة"], correctAnswer: "مدارية", rationale: "مطر موسمي." },
+                 { type: 'mcq', id: 7, question: "مشكلة الغابات ......", options: ["قطع جائر", "زراعة", "رعي", "بناء"], correctAnswer: "القطع الجائر", rationale: "تدهور بيئي." },
+                 { type: 'mcq', id: 8, question: "أهمية المطاط ......", options: ["إطارات", "ورق", "أثاث", "وقود"], correctAnswer: "إطارات", rationale: "صناعة." },
+                 { type: 'mcq', id: 9, question: "حديقة حيوان طبيعية ......", options: ["سافانا", "غابة", "صحراء", "نهر"], correctAnswer: "السافانا", rationale: "تنوع الحيوانات." },
+                 { type: 'mcq', id: 10, question: "حوض الكونغو مناخه ......", options: ["استوائي", "مداري", "صحراوي", "موسمي"], correctAnswer: "استوائي", rationale: "مطر دائم." },
+                 { type: 'mcq', id: 11, question: "طيور ملونة ......", options: ["ببغاء", "نسر", "صقر", "غوراب"], correctAnswer: "الببغاء", rationale: "في الغابات." },
+                 { type: 'mcq', id: 12, question: "أشجار المتوسط ......", options: ["دائمة الخضرة", "نفضية", "موسمية", "جافة"], correctAnswer: "دائمة الخضرة", rationale: "تتحمل الجفاف." },
+                 { type: 'mcq', id: 13, question: "خشب الماهوجني ......", options: ["استوائي", "معتدل", "بارد", "صحراوي"], correctAnswer: "استوائي", rationale: "صلب." },
+                 { type: 'mcq', id: 14, question: "مطر المتوسط ......", options: ["شتاء", "صيف", "دائم", "خريف"], correctAnswer: "شتاء", rationale: "مناخ معتدل." },
+                 { type: 'mcq', id: 15, question: "تقل الغابات بالاتجاه ......", options: ["شمال وجنوب", "شرق", "غرب", "وسط"], correctAnswer: "شمال وجنوب", rationale: "بعداً عن الاستواء." },
+                 { type: 'mcq', id: 16, question: "فائدة الغابات ......", options: ["توازن بيئي", "تلوث", "حرارة", "ضوضاء"], correctAnswer: "توازن بيئي", rationale: "أكسجين." },
+                 { type: 'mcq', id: 17, question: "حيوانات المتوسط ......", options: ["أغنام", "أسود", "فيلة", "تماسيح"], correctAnswer: "أغنام", rationale: "رعي." },
+                 { type: 'mcq', id: 18, question: "غابات تنفض أوراقها ......", options: ["مدارية", "استوائية", "دائمة", "مخروطية"], correctAnswer: "مدارية", rationale: "في الجفاف." },
+                 { type: 'mcq', id: 19, question: "شرط الغابات ......", options: ["مطر", "رياح", "ضوء", "تربة"], correctAnswer: "مطر", rationale: "غزير." },
+                 { type: 'mcq', id: 20, question: "خطر بيئي ......", options: ["انجراف تربة", "فيضان", "زلزال", "بركان"], correctAnswer: "انجراف تربة", rationale: "بعد القطع." },
+                 { type: 'essay', id: 21, question: "بم تفسر: كثافة الغابات الاستوائية.", modelAnswer: "وفرة المطر والحرارة." },
+                 { type: 'essay', id: 22, question: "ما النتائج: القطع الجائر.", modelAnswer: "احتباس حراري وتدهور بيئي." },
+                 { type: 'essay', id: 23, question: "دلل: تنوع الغابات.", modelAnswer: "استوائية، مدارية، متوسطية." },
+                 { type: 'essay', id: 24, question: "ما العلاقة: المطر والغابات.", modelAnswer: "المطر يحدد النوع والكثافة." },
+                 { type: 'essay', id: 25, question: "استنتج: أهمية اقتصادية للغابات.", modelAnswer: "أخشاب ومطاط وكاكاو." },
+                 { type: 'essay', id: 26, question: "قارن: استوائية ومتوسطية.", modelAnswer: "الاستوائية: كثيفة (كونغو). المتوسطية: أقل كثافة (أطلس)." },
+                 { type: 'essay', id: 27, question: "ماذا يحدث إذا: أزيلت الغابات.", modelAnswer: "نقص أكسجين وتغير مناخ." },
+                 { type: 'essay', id: 28, question: "فسر: صعوبة الحركة في الاستوائية.", modelAnswer: "تشابك الأشجار." },
+                 { type: 'essay', id: 29, question: "وضح: تكيف أشجار المتوسط.", modelAnswer: "تحمل الجفاف (دائمة الخضرة)." },
+                 { type: 'essay', id: 30, question: "رأيك: حماية الغابات.", modelAnswer: "قوانين وتشجير." }
+            ],
+
+            '3-2': [
+                 { type: 'mcq', id: 1, question: "حشائش حارة ......", options: ["سافانا", "إستبس", "تندرا", "براري"], correctAnswer: "سافانا", rationale: "طويلة." },
+                 { type: 'mcq', id: 2, question: "حديقة حيوان ......", options: ["سافانا", "صحراء", "غابة", "نهر"], correctAnswer: "سافانا", rationale: "تنوع الحيوانات." },
+                 { type: 'mcq', id: 3, question: "حشائش معتدلة ......", options: ["إستبس", "سافانا", "تندرا", "حلفا"], correctAnswer: "إستبس", rationale: "قصيرة." },
+                 { type: 'mcq', id: 4, question: "طول السافانا يعتمد على ......", options: ["المطر", "الريح", "التربة", "الضوء"], correctAnswer: "المطر", rationale: "تدرج." },
+                 { type: 'mcq', id: 5, question: "حيوان عشبي ......", options: ["زراف", "أسد", "نمر", "ضبع"], correctAnswer: "زراف", rationale: "في السافانا." },
+                 { type: 'mcq', id: 6, question: "حيوان لاحم ......", options: ["أسد", "فيل", "غزال", "حمار وحشي"], correctAnswer: "أسد", rationale: "مفترس." },
+                 { type: 'mcq', id: 7, question: "نباتات جفاف ......", options: ["صحراوية", "استوائية", "مدارية", "موسمية"], correctAnswer: "صحراوية", rationale: "ندرة مياه." },
+                 { type: 'mcq', id: 8, question: "نبات يخزن المياه ......", options: ["صبار", "بلوط", "أرز", "زان"], correctAnswer: "صبار", rationale: "تحمل العطش." },
+                 { type: 'mcq', id: 9, question: "حيوان الإستبس ......", options: ["أغنام", "فيلة", "أسود", "تماسيح"], correctAnswer: "أغنام", rationale: "رعي." },
+                 { type: 'mcq', id: 10, question: "الصحراء الكبرى في ......", options: ["الشمال", "الجنوب", "الشرق", "الغرب"], correctAnswer: "الشمال", rationale: "أكبر صحراء." },
+                 { type: 'mcq', id: 11, question: "صحراء كالهاري في ......", options: ["الجنوب الغربي", "الشمال", "الشرق", "الوسط"], correctAnswer: "الجنوب الغربي", rationale: "ناميبيا وبوتسوانا." },
+                 { type: 'mcq', id: 12, question: "مراعي طبيعية ......", options: ["إستبس", "تندرا", "غابات", "مستنقعات"], correctAnswer: "إستبس", rationale: "للأغنام." },
+                 { type: 'mcq', id: 13, question: "حيوان يتحمل العطش ......", options: ["الجمل", "الحصان", "البقرة", "الكلب"], correctAnswer: "الجمل", rationale: "سفينة الصحراء." },
+                 { type: 'mcq', id: 14, question: "نبات شوكي ......", options: ["تين شوكي", "تفاح", "برتقال", "مانجو"], correctAnswer: "تين شوكي", rationale: "صحراوي." },
+                 { type: 'mcq', id: 15, question: "النخيل بيئة ......", options: ["صحراوية", "استوائية", "جليدية", "جبلية"], correctAnswer: "صحراوية", rationale: "جذور طويلة." },
+                 { type: 'mcq', id: 16, question: "السافانا حشائش ......", options: ["طويلة", "قصيرة", "زاحفة", "مائية"], correctAnswer: "طويلة", rationale: "حسب المطر." },
+                 { type: 'mcq', id: 17, question: "انعدام النبات ......", options: ["جفاف شديد", "مطر غزير", "اعتدال", "برودة"], correctAnswer: "جفاف شديد", rationale: "صحاري." },
+                 { type: 'mcq', id: 18, question: "ثروة السافانا ......", options: ["حيوانية", "سمكية", "زراعية", "صناعية"], correctAnswer: "حيوانية", rationale: "ماشية." },
+                 { type: 'mcq', id: 19, question: "زواحف الصحراء ......", options: ["ضبان", "تماسيح", "حيتان", "دلافين"], correctAnswer: "ضبان", rationale: "تحمل حرارة." },
+                 { type: 'mcq', id: 20, question: "قوارض الصحراء ......", options: ["جرذان", "أرانب", "قطط", "طيور"], correctAnswer: "جرذان", rationale: "جحور." },
+                 { type: 'essay', id: 21, question: "بم تفسر: السافانا حديقة حيوان.", modelAnswer: "تنوع الحيوانات (عشبية ولاحمة)." },
+                 { type: 'essay', id: 22, question: "ما النتائج: ندرة مطر الصحراء.", modelAnswer: "فقر نباتي وسكاني." },
+                 { type: 'essay', id: 23, question: "دلل: تكيف نبات الصحراء.", modelAnswer: "جذور طويلة وأوراق سميكة." },
+                 { type: 'essay', id: 24, question: "ما العلاقة: المطر والسافانا.", modelAnswer: "الطول يقل بقلة المطر." },
+                 { type: 'essay', id: 25, question: "استنتج: أهمية الإستبس.", modelAnswer: "مراعي للأغنام." },
+                 { type: 'essay', id: 26, question: "قارن: سافانا وإستبس.", modelAnswer: "سافانا: حارة طويلة. إستبس: معتدلة قصيرة." },
+                 { type: 'essay', id: 27, question: "ماذا يحدث إذا: مطر غزير بالصحراء.", modelAnswer: "نمو نبات وحياة." },
+                 { type: 'essay', id: 28, question: "فسر: تحمل الجمل.", modelAnswer: "تخزين دهون وخف عريض." },
+                 { type: 'essay', id: 29, question: "حدد: مناطق صحراوية.", modelAnswer: "الصحراء الكبرى وكالهاري." },
+                 { type: 'essay', id: 30, question: "رأيك: تنمية الصحراء.", modelAnswer: "واحات، تعدين، سياحة." }
+            ],
+
+            '3-3': [
+                 { type: 'mcq', id: 1, question: "مياه عذبة ......", options: ["أنهار", "بحار", "محيطات", "خلجان"], correctAnswer: "أنهار", rationale: "نيل وكونغو." },
+                 { type: 'mcq', id: 2, question: "سمك نيلي ......", options: ["بلطي", "قرش", "تونه", "سردين"], correctAnswer: "البلطي", rationale: "مياه عذبة." },
+                 { type: 'mcq', id: 3, question: "شعاب مرجانية ......", options: ["بحر أحمر", "متوسط", "نيل", "بحيرة"], correctAnswer: "بحر أحمر", rationale: "مياه دافئة." },
+                 { type: 'mcq', id: 4, question: "حيوان برمائي ......", options: ["فرس النهر", "جمل", "أسد", "نمر"], correctAnswer: "فرس النهر", rationale: "يعيش في النيل." },
+                 { type: 'mcq', id: 5, question: "نبات مائي ......", options: ["ورد النيل", "صبار", "نخيل", "تين"], correctAnswer: "ورد النيل", rationale: "يطفو." },
+                 { type: 'mcq', id: 6, question: "أكبر بحيرة ......", options: ["فيكتوريا", "تانا", "تشاد", "ناصر"], correctAnswer: "فيكتوريا", rationale: "عذبة." },
+                 { type: 'mcq', id: 7, question: "تماسيح تعيش في ......", options: ["أنهار", "صحراء", "جبال", "جو"], correctAnswer: "أنهار", rationale: "مياه." },
+                 { type: 'mcq', id: 8, question: "مصايد بحرية ......", options: ["أسماك", "طيور", "حيوانات", "حشرات"], correctAnswer: "أسماك", rationale: "غذاء." },
+                 { type: 'mcq', id: 9, question: "طيور مهاجرة ......", options: ["لقلق", "دجاج", "بط", "حمام"], correctAnswer: "لقلق", rationale: "عبر النيل." },
+                 { type: 'mcq', id: 10, question: "مياه المتوسط ......", options: ["مالحة", "عذبة", "جوفية", "نقية"], correctAnswer: "مالحة", rationale: "بحر." },
+                 { type: 'mcq', id: 11, question: "ضرر مائي ......", options: ["تلوث", "صيد", "ملاحة", "سياحة"], correctAnswer: "تلوث", rationale: "مخلفات." },
+                 { type: 'mcq', id: 12, question: "نبات مستنقعات ......", options: ["بردي", "صنوبر", "أرز", "تفاح"], correctAnswer: "بردي", rationale: "مياه ضحلة." },
+                 { type: 'mcq', id: 13, question: "ثروة غير سمكية ......", options: ["إسفنج", "حديد", "نحاس", "فحم"], correctAnswer: "إسفنج", rationale: "بحرية." },
+                 { type: 'mcq', id: 14, question: "مصب الكونغو ......", options: ["أطلنطي", "هندي", "متوسط", "أحمر"], correctAnswer: "أطلنطي", rationale: "غرباً." },
+                 { type: 'mcq', id: 15, question: "أنواع الأسماك ......", options: ["كثيرة", "نادرة", "منعدمة", "قليلة"], correctAnswer: "كثيرة", rationale: "تنوع بيئي." },
+                 { type: 'mcq', id: 16, question: "استخدام الأنهار ......", options: ["ري", "صناعة", "تعدين", "رعي"], correctAnswer: "ري", rationale: "زراعة." },
+                 { type: 'mcq', id: 17, question: "الدلتا بيئة ......", options: ["زراعية", "صحراوية", "جبلية", "جليدية"], correctAnswer: "زراعية", rationale: "خصبة." },
+                 { type: 'mcq', id: 18, question: "تبريد الجسم بالماء ......", options: ["جاموس", "جمل", "ماعز", "كلب"], correctAnswer: "جاموس", rationale: "في الحر." },
+                 { type: 'mcq', id: 19, question: "نتيجة التلوث ......", options: ["موت أسماك", "زيادتها", "نموها", "تكاثرها"], correctAnswer: "موت أسماك", rationale: "تسمم." },
+                 { type: 'mcq', id: 20, question: "بحيرة مالحة ......", options: ["قارون", "فيكتوريا", "تانا", "ألبرت"], correctAnswer: "قارون", rationale: "مصر." },
+                 { type: 'essay', id: 21, question: "بم تفسر: شعاب البحر الأحمر.", modelAnswer: "مياه دافئة وصافية." },
+                 { type: 'essay', id: 22, question: "ما النتائج: تلوث النيل.", modelAnswer: "أمراض وموت أسماك." },
+                 { type: 'essay', id: 23, question: "دلل: تنوع الحياة المائية.", modelAnswer: "عذبة ومالحة (نهر وبحر)." },
+                 { type: 'essay', id: 24, question: "ما العلاقة: ورد النيل والمياه.", modelAnswer: "يستهلك المياه ويعيق الملاحة." },
+                 { type: 'essay', id: 25, question: "استنتج: أهمية الأنهار.", modelAnswer: "شرب، زراعة، كهرباء." },
+                 { type: 'essay', id: 26, question: "قارن: بحر أحمر ومتوسط.", modelAnswer: "الأحمر شعاب، المتوسط أسماك." },
+                 { type: 'essay', id: 27, question: "ماذا يحدث إذا: جفاف فيكتوريا.", modelAnswer: "موت النيل في مصر." },
+                 { type: 'essay', id: 28, question: "فسر: خطورة التماسيح.", modelAnswer: "حيوانات مفترسة." },
+                 { type: 'essay', id: 29, question: "وضح: حماية المياه.", modelAnswer: "منع التلوث." },
+                 { type: 'essay', id: 30, question: "رأيك: تنمية الثروة السمكية.", modelAnswer: "مزارع سمكية وتصنيع." }
+            ],
+
+            // --- UNIT 4 ---
+            '4-1': [
+                // MCQs (20 Questions)
+                { type: 'mcq', id: 1, question: "دخل الإسلام إلى مصر على يد القائد ......", options: ["عمرو بن العاص", "عقبة بن نافع", "خالد بن الوليد", "طارق بن زياد"], correctAnswer: "عمرو بن العاص", rationale: "فتح مصر عام 21 هـ / 641 م." },
+                { type: 'mcq', id: 2, question: "كانت الهجرة الأولى للمسلمين إلى ...... في شرق إفريقيا.", options: ["الحبشة", "مصر", "ليبيا", "المغرب"], correctAnswer: "الحبشة", rationale: "هاجروا إليها لأن بها ملكاً عادلاً (النجاشي)." },
+                { type: 'mcq', id: 3, question: "انتشر الإسلام في غرب إفريقيا بفضل جهود ......", options: ["التجار والدعاة", "الجيوش العسكرية", "الملوك فقط", "الرحالة الأوروبيين"], correctAnswer: "التجار والدعاة", rationale: "عن طريق التعامل الحسن والأمانة في التجارة." },
+                { type: 'mcq', id: 4, question: "من الطرق التجارية التي ساهمت في نشر الإسلام طريق ...... الذي يربط مصر بالمغرب.", options: ["شمال إفريقيا", "النيل", "الصحراء", "الساحل"], correctAnswer: "شمال إفريقيا", rationale: "الطريق الساحلي الشمالي." },
+                { type: 'mcq', id: 5, question: "لعبت قبائل ...... دوراً هاماً في نشر الإسلام في الصحراء الكبرى.", options: ["الطوارق والبربر", "الزولو", "الماساي", "الهوسا"], correctAnswer: "الطوارق والبربر", rationale: "سكان الصحراء وشمال إفريقيا." },
+                { type: 'mcq', id: 6, question: "تأسست مدينة ...... في تونس لتكون قاعدة لنشر الإسلام.", options: ["القيروان", "الفسطاط", "بغداد", "دمشق"], correctAnswer: "القيروان", rationale: "أسسها عقبة بن نافع." },
+                { type: 'mcq', id: 7, question: "من الممالك الإسلامية التي قامت في غرب إفريقيا مملكة ......", options: ["مالي", "أكسوم", "زيمبابوي", "مروي"], correctAnswer: "مالي", rationale: "مملكة مالي الإسلامية (ومن أشهر ملوكها منسا موسى)." },
+                { type: 'mcq', id: 8, question: "ساهم نهر ...... في نقل الإسلام إلى وسط إفريقيا.", options: ["النيل", "الكونغو", "السنغال", "أورانج"], correctAnswer: "النيل", rationale: "عبر القوافل النيلية من مصر للسودان والجنوب." },
+                { type: 'mcq', id: 9, question: "أمر الخليفة ...... بتعريب الدواوين مما ساهم في انتشار العربية بإفريقيا.", options: ["عبد الملك بن مروان", "عمر بن الخطاب", "عثمان بن عفان", "علي بن أبي طالب"], correctAnswer: "عبد الملك بن مروان", rationale: "الخليفة الأموي الذي عرب الدواوين." },
+                { type: 'mcq', id: 10, question: "يقع جامع ...... في تمبكتو وكان مركزاً لنشر العلم.", options: ["سنكوري", "الأزهر", "القيروان", "الزيتونة"], correctAnswer: "سنكوري", rationale: "جامعة إسلامية كبرى في مالي." },
+                { type: 'mcq', id: 11, question: "دخل الإسلام السودان (بلاد النوبة) عن طريق ......", options: ["اتفاقية البقط", "الحرب الشاملة", "الاحتلال", "الهجرة القسرية"], correctAnswer: "اتفاقية البقط", rationale: "معاهدة صلح وتجارة بين المسلمين والنوبة." },
+                { type: 'mcq', id: 12, question: "من السلع التي تاجر بها المسلمون مع غرب إفريقيا ......", options: ["الملح والذهب", "البترول", "السيارات", "الأجهزة"], correctAnswer: "الملح والذهب", rationale: "مبادلة ملح الشمال بذهب الجنوب." },
+                { type: 'mcq', id: 13, question: "تأثرت العمارة في شرق إفريقيا (سواحل الزنج) بـ ......", options: ["الطراز الإسلامي", "الطراز الروماني", "الطراز القوطي", "الطراز الفرعوني"], correctAnswer: "الطراز الإسلامي", rationale: "بناء المساجد والقصور." },
+                { type: 'mcq', id: 14, question: "انتشرت اللغة ...... كلغة ثقافة ودين في إفريقيا.", options: ["العربية", "اللاتينية", "الإنجليزية", "الفرنسية"], correctAnswer: "العربية", rationale: "لغة القرآن الكريم." },
+                { type: 'mcq', id: 15, question: "كان ...... من أشهر مراكز الثقافة الإسلامية في مصر.", options: ["الأزهر الشريف", "جامعة القاهرة", "مكتبة الإسكندرية القديمة", "معبد الكرنك"], correctAnswer: "الأزهر الشريف", rationale: "منارة العلم للعالم الإسلامي وإفريقيا." },
+                { type: 'mcq', id: 16, question: "أطلق المسلمون اسم ...... على سكان شمال إفريقيا الأصليين.", options: ["البربر", "الفراعنة", "النوبيين", "الزنوج"], correctAnswer: "البربر", rationale: "(الأمازيغ)." },
+                { type: 'mcq', id: 17, question: "أسس ...... مدينة الفسطاط في مصر.", options: ["عمرو بن العاص", "أحمد بن طولون", "جوهر الصقلي", "صلاح الدين"], correctAnswer: "عمرو بن العاص", rationale: "أول عاصمة إسلامية في إفريقيا." },
+                { type: 'mcq', id: 18, question: "انتشر الإسلام في القرن الإفريقي (الصومال) عن طريق ......", options: ["التجار عبر البحر الأحمر", "الجيوش البرية", "الرحالة", "المستعمرين"], correctAnswer: "التجار عبر البحر الأحمر", rationale: "لقربها من الجزيرة العربية." },
+                { type: 'mcq', id: 19, question: "قامت دولة ...... في المغرب العربي ولعبت دوراً في نشر الإسلام جنوباً.", options: ["المرابطين", "الفاطميين", "الأيوبيين", "المماليك"], correctAnswer: "المرابطين", rationale: "توغلت في الصحراء ونشرت الإسلام في الغرب." },
+                { type: 'mcq', id: 20, question: "استخدم التجار ...... كوسيلة نقل رئيسية عبر الصحراء الكبرى.", options: ["الجمال", "الخيول", "العربات", "السفن"], correctAnswer: "الجمال", rationale: "قوافل الإبل." },
+
+                // Essays (10 Questions)
+                { type: 'essay', id: 21, question: "بم تفسر: سرعة انتشار الإسلام في قارة إفريقيا.", modelAnswer: "بسبب سماحة الدين الإسلامي، المعاملة الحسنة والأمانة من التجار المسلمين، والبساطة والعدل والمساواة التي وجدها الأفارقة في الإسلام." },
+                { type: 'essay', id: 22, question: "ما النتائج المترتبة على: دخول الإسلام إلى غرب إفريقيا.", modelAnswer: "قيام ممالك إسلامية قوية (مثل مالي وسنغاي)، انتشار اللغة العربية والثقافة الإسلامية، وازدهار حركة التجارة والتعليم (جامع سنكوري)." },
+                { type: 'essay', id: 23, question: "دلل على: كان للتجار المسلمين دور أكبر من الجيوش في نشر الإسلام بإفريقيا.", modelAnswer: "حيث توغل التجار في مناطق الغابات والصحاري التي لم تصلها الجيوش، ونشروا الدين بالقدوة الحسنة والمصاهرة مع السكان المحليين." },
+                { type: 'essay', id: 24, question: "ما العلاقة بين: نهر النيل وانتشار الإسلام.", modelAnswer: "كان النيل طريقاً للمواصلات نقل عبره التجار والدعاة الإسلام من مصر إلى بلاد النوبة (السودان) ومنها إلى وسط إفريقيا." },
+                { type: 'essay', id: 25, question: "استنتج: دور عبد الملك بن مروان في تعزيز الوجود العربي بإفريقيا.", modelAnswer: "قام بتعريب الدواوين وصك العملة العربية، مما جعل اللغة العربية لغة الإدارة والرسميات، فساعد على انتشارها بين الشعوب الإفريقية." },
+                { type: 'essay', id: 26, question: "قارن بين: دور مدينة 'القيروان' ومدينة 'تمبكتو' في الثقافة الإسلامية.", modelAnswer: "القيروان (تونس): قاعدة الانطلاق الأولى للفتوحات ونشر العلم في الشمال. تمبكتو (مالي): مركز إشعاع حضاري وعلمي في غرب إفريقيا (جامعة سنكوري)." },
+                { type: 'essay', id: 27, question: "ماذا يحدث إذا: لم يهاجر المسلمون الأوائل إلى الحبشة.", modelAnswer: "لما حدث أول احتكاك مباشر وإيجابي بين المسلمين وأهل إفريقيا، ولربما تأخر معرفة أهل شرق إفريقيا بالإسلام." },
+                { type: 'essay', id: 28, question: "فسر: ترحيب المصريين بالفتح الإسلامي.", modelAnswer: "للتخلص من ظلم واضطهاد الرومان (البيزنطيين) الذين فرضوا الضرائب الباهظة واضطهدوا المصريين دينياً." },
+                { type: 'essay', id: 29, question: "وضح: أثر الإسلام على العادات والتقاليد الاجتماعية في إفريقيا.", modelAnswer: "نظم الإسلام عادات الزواج والميراث، وحرم العادات السيئة، ونشر قيم التكافل والعدل بين القبائل." },
+                { type: 'essay', id: 30, question: "أيد بالأدلة: لمصر دور تاريخي في نشر الإسلام بإفريقيا.", modelAnswer: "كانت مصر بوابة الإسلام للقارة، ومنها انطلقت الجيوش لفتح الشمال، وعبر نيلها انتقل الإسلام للجنوب، ولعب الأزهر دوراً كبيراً في تعليم أبناء القارة." }
+            ],
+
+            '4-2': [
+                // MCQs (20 Questions)
+                { type: 'mcq', id: 1, question: "أرسل الأزهر الشريف ...... لتعليم الناس أمور دينهم في إفريقيا.", options: ["البعثات العلمية", "الجيوش", "التجار", "العمال"], correctAnswer: "البعثات العلمية", rationale: "علماء ومشايخ لنشر العلم." },
+                { type: 'mcq', id: 2, question: "استقبل رواق ...... بالأزهر الطلاب الوافدين من إفريقيا.", options: ["الأفارقة (المغاربة، السنارية..)", "الشام", "الأتراك", "الهنود"], correctAnswer: "الأفارقة (المغاربة، السنارية..)", rationale: "خصصت أروقة لطلاب أمم إفريقيا المختلفة." },
+                { type: 'mcq', id: 3, question: "ارتبطت الكنيسة المصرية بالكنيسة في ...... لقرون طويلة.", options: ["إثيوبيا", "روما", "القسطنطينية", "أنطاكيا"], correctAnswer: "إثيوبيا", rationale: "كان مطران إثيوبيا يعين من الكنيسة المصرية." },
+                { type: 'mcq', id: 4, question: "تأثرت العمارة في غرب إفريقيا بـ ......", options: ["العمارة المصرية الإسلامية", "العمارة الأوروبية", "الكهوف", "الخيام"], correctAnswer: "العمارة المصرية الإسلامية", rationale: "في بناء المساجد والقباب." },
+                { type: 'mcq', id: 5, question: "من مظاهر التأثير الثقافي المصري في إفريقيا انتشار ......", options: ["اللغة العربية", "اللغة الهيروغليفية", "اللغة الفارسية", "اللغة اليونانية"], correctAnswer: "اللغة العربية", rationale: "كلغة للدين والعلم والأدب." },
+                { type: 'mcq', id: 6, question: "تشابه تصميم مئذنة جامع ...... مع مآذن المساجد المصرية.", options: ["أغاديس (النيجر)", "قرطبة", "دمشق", "صنعاء"], correctAnswer: "أغاديس (النيجر)", rationale: "تأثرت بالطراز المصري المملوكي." },
+                { type: 'mcq', id: 7, question: "لعب ...... دوراً في توطيد العلاقات السياسية بين مصر ودول إفريقيا الإسلامية.", options: ["تبادل الهدايا والرسل", "الحروب", "العزلة", "بناء السدود"], correctAnswer: "تبادل الهدايا والرسل", rationale: "بين سلاطين مصر وملوك إفريقيا (مثل مالي)." },
+                { type: 'mcq', id: 8, question: "مر الرحالة ...... بمصر أثناء رحلته للحج وذكر ثراء مصر.", options: ["منسا موسى", "ابن بطوطة", "فاسكو دا جاما", "ماجلان"], correctAnswer: "منسا موسى", rationale: "ملك مالي الشهير الذي مر بمصر." },
+                { type: 'mcq', id: 9, question: "كانت مصر مركزاً لـ ...... الكتب والمخطوطات لإفريقيا.", options: ["تصدير", "حرق", "منع", "إخفاء"], correctAnswer: "تصدير", rationale: "نقل الكتب العلمية والدينية." },
+                { type: 'mcq', id: 10, question: "ساعدت مصر الدول الإفريقية في العصور الوسطى وقت ......", options: ["المجاعات والأزمات", "الرخاء فقط", "الاحتلال", "الفيضانات"], correctAnswer: "المجاعات والأزمات", rationale: "أرسلت المساعدات الغذائية (القمح)." },
+                { type: 'mcq', id: 11, question: "تولي القضاة المصريين مناصب في ...... دليل على الثقة في علمهم.", options: ["السودان وغرب إفريقيا", "أوروبا", "الصين", "الهند"], correctAnswer: "السودان وغرب إفريقيا", rationale: "استعان بهم ملوك إفريقيا لتطبيق الشريعة." },
+                { type: 'mcq', id: 12, question: "كانت العملة ...... تستخدم في بعض الأسواق الإفريقية.", options: ["المصرية (الدينار)", "الرومانية", "الفارسية", "الهندية"], correctAnswer: "المصرية (الدينار)", rationale: "لقوتها الاقتصادية." },
+                { type: 'mcq', id: 13, question: "نقل الحجاج الأفارقة معهم ...... من مصر عند عودتهم.", options: ["الكسوة والأقمشة", "الأسلحة", "الرمال", "الحجارة"], correctAnswer: "الكسوة والأقمشة", rationale: "المنسوجات المصرية كانت مشهورة." },
+                { type: 'mcq', id: 14, question: "العلاقة بين الأزهر ومساجد إفريقيا علاقة ......", options: ["تكامل وتأثير", "تنافس", "عداء", "انفصال"], correctAnswer: "تكامل وتأثير", rationale: "الأزهر هو المرجع والنموذج." },
+                { type: 'mcq', id: 15, question: "استخدمت الطرق الصوفية في ...... بين القبائل الإفريقية.", options: ["الإصلاح ونشر السلام", "إشعال الحرب", "التجارة فقط", "السرقة"], correctAnswer: "الإصلاح ونشر السلام", rationale: "نشرت الروحانيات وحل النزاعات." },
+                { type: 'mcq', id: 16, question: "يعتبر ...... أقدم جامعة إسلامية في إفريقيا والعالم.", options: ["الأزهر", "القيروان", "الزيتونة", "القرويين"], correctAnswer: "القرويين/الزيتونة/الأزهر", rationale: "في السياق المصري، الأزهر هو المنارة الأبرز (جامع وجامعة)." },
+                { type: 'mcq', id: 17, question: "تأثر نظام الحكم في بعض الممالك الإفريقية بـ ......", options: ["النظام الإداري المصري", "النظام الروماني", "النظام القبلي فقط", "الفوضى"], correctAnswer: "النظام الإداري المصري", rationale: "الدواوين وتنظيم الدولة." },
+                { type: 'mcq', id: 18, question: "كان ميناء ...... معبراً لتجارة مصر مع شرق إفريقيا.", options: ["عيذاب", "الإسكندرية", "دمياط", "بورسعيد"], correctAnswer: "عيذاب", rationale: "على ساحل البحر الأحمر." },
+                { type: 'mcq', id: 19, question: "ساهم ...... في كتابة تاريخ إفريقيا وتدوين أحداثها.", options: ["المؤرخون والعلماء", "الجنود", "الفلاحون", "الصناع"], correctAnswer: "المؤرخون والعلماء", rationale: "مثل المقريزي وغيرهم." },
+                { type: 'mcq', id: 20, question: "يعد الوجود المصري في إفريقيا وجوداً ......", options: ["حضارياً ودينياً", "عسكرياً فقط", "استغلالياً", "مؤقتاً"], correctAnswer: "حضارياً ودينياً", rationale: "قائم على التأثير الثقافي والديني." },
+
+                // Essays (10 Questions)
+                { type: 'essay', id: 21, question: "بم تفسر: المكانة المرموقة للأزهر الشريف في نفوس الأفارقة.", modelAnswer: "لأنه قبلة لطلاب العلم من كل أنحاء القارة، ومنه تخرج العلماء والدعاة الذين نشروا الإسلام الصحيح واللغة العربية في بلادهم." },
+                { type: 'essay', id: 22, question: "ما النتائج المترتبة على: رحلة منسا موسى (ملك مالي) للحج ومروره بمصر.", modelAnswer: "انبهاره بحضارة مصر وعمرانها، ونقله للعديد من الكتب والعلماء والمهندسين المصريين معه إلى مالي، مما أثر في نهضتها." },
+                { type: 'essay', id: 23, question: "دلل على: التأثير المعماري المصري في دول إفريقيا الإسلامية.", modelAnswer: "يظهر ذلك في تصميم المساجد والمنارات (مثل مئذنة مسجد أغاديس) واستخدام القباب والزخارف الإسلامية المشابهة للعمارة المملوكية." },
+                { type: 'essay', id: 24, question: "ما العلاقة بين: الكنيسة المصرية وإثيوبيا في العصور الوسطى.", modelAnswer: "كانت الكنيسة المصرية تعين المطارنة لإثيوبيا، مما خلق رابطاً روحياً وثقافياً قوياً بين الشعبين وحافظ على العلاقات الودية لقرون." },
+                { type: 'essay', id: 25, question: "استنتج: دور مصر في الحفاظ على الهوية الإسلامية لإفريقيا.", modelAnswer: "من خلال إرسال البعثات الأزهرية، واستقبال الطلاب، وتوفير الكتب والمصاحف، والدفاع عن قضايا المسلمين في القارة." },
+                { type: 'essay', id: 26, question: "قارن بين: دور التاجر المسلم ودور العالم الأزهري في إفريقيا.", modelAnswer: "التاجر: نشر الإسلام بالمعاملة والقدوة والاختلاط اليومي. العالم الأزهري: نشر الإسلام بالتعليم والتدريس وتصحيح المفاهيم." },
+                { type: 'essay', id: 27, question: "ماذا يحدث إذا: انقطعت صلة الأزهر بإفريقيا.", modelAnswer: "لانتشر الجهل بالدين، وربما سادت أفكار متطرفة أو خاطئة، ولضعفت اللغة العربية، وتراجعت الروابط الثقافية بين مصر وعمقها الإفريقي." },
+                { type: 'essay', id: 28, question: "فسر: وجود أروقة خاصة للطلاب الأفارقة (السنارية، البرناوية..) في الأزهر.", modelAnswer: "دليل على اهتمام الأزهر بتوفير الرعاية الكاملة (سكن ومعيشة وتعليم) للطلاب الوافدين من مختلف ممالك وقبائل إفريقيا." },
+                { type: 'essay', id: 29, question: "وضح: كيف دعمت مصر حركات التحرر الإفريقية (حديثاً امتداداً لدورها).", modelAnswer: "استقبلت الزعماء، قدمت الدعم السياسي والمادي، وساهمت في تأسيس منظمة الوحدة الإفريقية (الاتحاد الإفريقي حالياً)." },
+                { type: 'essay', id: 30, question: "أيد بالأدلة: العلاقات المصرية الإفريقية علاقات مصير مشترك.", modelAnswer: "جغرافياً (النيل)، تاريخياً (الوحدة الحضارية)، دينياً (الإسلام والمسيحية)، وسياسياً (الأمن القومي)، فاستقرار إفريقيا من استقرار مصر." }
+            ]
+        };
+
+        // --- Generator for other units ---
+        const generateMockQuestions = (lessonId) => {
+             return [
+                { type: 'mcq', id: 1, question: `سؤال إضافي للدرس ${lessonId} (جاري تحديث المحتوى)`, options: ["اختيار 1", "اختيار 2", "اختيار 3", "اختيار 4"], correctAnswer: "اختيار 1", rationale: "سيتم إضافة أسئلة هذا الدرس قريباً." },
+                { type: 'essay', id: 2, question: `سؤال مقالي رقم 1 للدرس ${lessonId}`, modelAnswer: "الإجابة تعتمد على فهم الطالب لمحتوى الدرس." },
+                { type: 'mcq', id: 3, question: `سؤال إضافي آخر للدرس ${lessonId}`, options: ["أ", "ب", "ج", "د"], correctAnswer: "أ", rationale: "سؤال تجريبي." }
+            ];
+        };
+
+        const getQuestionsForLesson = (lessonId) => {
+            return questionsDatabase[lessonId] || generateMockQuestions(lessonId);
+        };
+
+        // --- Icons ---
+        const Icons = {
+            Maximize: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>,
+            Minimize: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>,
+            Check: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+            X: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+            ChevronLeft: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>,
+            ChevronRight: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>,
+            RotateCcw: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12"/><path d="M3 3v9h9"/></svg>,
+            Home: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+            Award: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>,
+            Lock: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+            Layout: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>,
+            PlayCircle: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>,
+            CheckCircle: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
+            FileText: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        };
+
+        const Watermark = () => (
+            <div className="watermark-container">
+                {Array.from({ length: 12 }).map((_, i) => (
+                    <div key={i} className="watermark-text">أ/ إسلام سعود</div>
+                ))}
+            </div>
+        );
+
+        const BlockedScreen = () => (
+            <div className="flex flex-col items-center justify-center min-h-[80vh] w-full px-4 animate-fade-in relative z-10">
+                <div className="glass-card p-8 rounded-3xl w-full max-w-lg text-center shadow-2xl border-red-100">
+                    <div className="mb-6 flex justify-center">
+                        <div className="bg-red-100 p-6 rounded-full text-red-600 shadow-inner">
+                            <Icons.Lock />
+                        </div>
+                    </div>
+                    <h2 className="text-2xl font-black text-slate-800 mb-4">عفواً، تم حظر الدخول</h2>
+                    <p className="text-slate-600 font-semibold mb-2">يبدو أنك حاولت تجاوز نظام الاختبار.</p>
+                </div>
+            </div>
+        );
+
+        const Home = ({ onStart }) => {
+            const [name, setName] = useState("");
+            const [error, setError] = useState("");
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (name.trim().length < 3) {
+                    setError("يرجى كتابة الاسم الثلاثي على الأقل");
+                    return;
+                }
+                onStart(name);
+            };
+
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[80vh] w-full px-4 animate-fade-in relative z-10">
+                    <div className="glass-card p-8 md:p-12 rounded-3xl w-full max-w-lg text-center shadow-2xl">
+                        
+                        {/* New Logo Header Area (Large Home Version) */}
+                        <HeaderLogo />
+
+                        <p className="text-slate-500 font-bold text-lg mb-6">كنز ليلة الامتحان</p>
+                        
+                        <div className="bg-blue-50/50 rounded-xl p-4 mb-8 border border-blue-100">
+                            <h2 className="text-xl font-bold text-blue-800 mb-1">الدراسات الاجتماعية - الصف الأول الإعدادي</h2>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="text-right">
+                                <label className="block text-sm font-bold text-slate-700 mb-2 mr-1">اسم الطالب رباعي:</label>
+                                <input 
+                                    type="text" 
+                                    value={name}
+                                    onChange={(e) => {setName(e.target.value); setError("");}}
+                                    placeholder="اكتب اسمك هنا..."
+                                    className="w-full px-5 py-3 rounded-xl border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-white/80 font-semibold text-slate-800"
+                                />
+                                {error && <p className="text-red-500 text-sm mt-1 font-semibold animate-pulse">{error}</p>}
+                            </div>
+                            <button 
+                                type="submit"
+                                className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2 text-lg"
+                            >
+                                ابدأ الاختبار
+                                <Icons.ChevronLeft />
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        const Dashboard = ({ studentName, completedLessons, onSelectLesson, onLogout }) => {
+            const totalLessons = unitsStructure.reduce((acc, unit) => acc + unit.lessons.length, 0);
+            const completedCount = completedLessons.length;
+            const remainingCount = totalLessons - completedCount;
+            const progress = Math.round((completedCount / totalLessons) * 100);
+
+            return (
+                <div className="flex flex-col items-center justify-start pt-20 min-h-screen w-full px-4 relative z-10 pb-20">
+                    <div className="glass-card w-full max-w-4xl p-6 rounded-3xl shadow-lg mb-8 animate-fade-in">
+                        <div className="flex flex-col items-center gap-4 mb-4">
+                            <HeaderLogo compact={true} />
+                            
+                            <div className="w-full grid grid-cols-2 gap-4 mt-2">
+                                <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                                    <div className="text-green-600 font-bold text-xl">{completedCount}</div>
+                                    <div className="text-green-700 text-sm font-semibold">تم إنجازه</div>
+                                </div>
+                                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+                                    <div className="text-amber-600 font-bold text-xl">{remainingCount}</div>
+                                    <div className="text-amber-700 text-sm font-semibold">متبقي</div>
+                                </div>
+                            </div>
+                            
+                            <div className="w-full text-center mt-2">
+                                <div className="text-3xl font-black text-blue-600">{progress}%</div>
+                                <div className="text-xs font-bold text-slate-400">نسبة الإنجاز</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
+                        {unitsStructure.map((unit) => (
+                            <div key={unit.id} className={`glass-card p-6 rounded-3xl shadow-md hover:shadow-xl transition-all border-t-4 ${unit.borderClass} animate-fade-in`}>
+                                <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${unit.colorClass}`}>
+                                    <Icons.Layout />
+                                    {unit.title}
+                                </h3>
+                                <div className="space-y-3">
+                                    {unit.lessons.map((lesson) => {
+                                        const isCompleted = completedLessons.includes(lesson.id);
+                                        return (
+                                            <button
+                                                key={lesson.id}
+                                                onClick={() => onSelectLesson(lesson)}
+                                                className={`w-full flex items-center justify-between p-3 rounded-xl border-2 transition-all font-semibold ${
+                                                    isCompleted 
+                                                    ? 'bg-green-100 border-green-200 text-green-800' 
+                                                    : `bg-white border-slate-100 text-slate-600 ${lesson.btnColor}`
+                                                }`}
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    {isCompleted ? <Icons.CheckCircle /> : <Icons.PlayCircle />}
+                                                    {lesson.title}
+                                                </div>
+                                                {isCompleted && <span className="text-xs bg-green-200 text-green-800 px-2 py-1 rounded-lg">مكتمل</span>}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const Quiz = ({ lesson, onFinish, onBack }) => {
+            const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+            const [mcqAnswers, setMcqAnswers] = useState({});
+            const [essayAnswers, setEssayAnswers] = useState({});
+            const [showRationale, setShowRationale] = useState(false);
+            const [showEssayModel, setShowEssayModel] = useState(false);
+            const nextButtonRef = useRef(null);
+
+            const [questions, setQuestions] = useState(null);
+
+            useEffect(() => {
+                setQuestions(getQuestionsForLesson(lesson.id));
+            }, [lesson.id]);
+
+            useEffect(() => {
+                if (nextButtonRef.current && (showRationale || showEssayModel)) {
+                    setTimeout(() => {
+                        nextButtonRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 100);
+                }
+            }, [showRationale, showEssayModel]);
+
+            if (!questions) return <div className="text-center p-10 font-bold">جاري تحميل الأسئلة...</div>;
+
+            const currentQ = questions[currentQuestionIndex];
+            const isLastQuestion = currentQuestionIndex === questions.length - 1;
+
+            const handleMcqOptionClick = (option) => {
+                if (mcqAnswers[currentQuestionIndex]) return;
+                
+                const isCorrect = option === currentQ.correctAnswer;
+                setMcqAnswers(prev => ({ ...prev, [currentQuestionIndex]: { selected: option, isCorrect } }));
+                
+                if (!isCorrect) setShowRationale(true);
+            };
+
+            const handleNext = () => {
+                setShowRationale(false);
+                setShowEssayModel(false);
+                
+                if (!isLastQuestion) {
+                    setCurrentQuestionIndex(prev => prev + 1);
+                } else {
+                    // Finish Quiz
+                    let score = 0;
+                    let mcqCount = 0;
+                    questions.forEach((q, idx) => {
+                        if (q.type === 'mcq') {
+                            mcqCount++;
+                            if (mcqAnswers[idx]?.isCorrect) score++;
+                        }
+                    });
+                    onFinish(score, mcqCount);
+                }
+            };
+
+            const handleEssaySubmit = () => {
+                if(!essayAnswers[currentQuestionIndex]) {
+                    setEssayAnswers(prev => ({...prev, [currentQuestionIndex]: "تمت الإجابة"}));
+                }
+                setShowEssayModel(true);
+            };
+
+            const progress = Math.round(((currentQuestionIndex + 1) / questions.length) * 100);
+
+            return (
+                <div className="flex flex-col items-center justify-start pt-20 min-h-screen w-full px-4 relative z-10 pb-20">
+                    <div className="w-full max-w-3xl mb-6 flex flex-col items-center">
+                        <div className="w-full flex items-center justify-between mt-4">
+                            <button onClick={onBack} className="flex items-center gap-1 text-slate-500 hover:text-blue-600 font-bold bg-white/50 px-3 py-1 rounded-lg transition-colors">
+                                 <Icons.ChevronRight /> خروج
+                            </button>
+                            <h2 className="text-blue-900 font-bold">{lesson.title}</h2>
+                        </div>
+                    </div>
+
+                    <div className="w-full max-w-3xl mb-6">
+                        <div className="flex items-center justify-between text-sm font-bold text-slate-600 mb-2 bg-white/60 p-2 rounded-xl border border-white/50 shadow-sm backdrop-blur-sm">
+                             <span className="w-1/4 text-right">السؤال {currentQuestionIndex + 1} / {questions.length}</span>
+                             
+                             {/* Center Logo Area */}
+                             <div className="flex-1 flex justify-center items-center gap-2">
+                                <span className="text-amber-600 font-black text-lg tracking-tight">سلسلة الكنز</span>
+                                <span className="hidden sm:inline-block w-px h-4 bg-slate-300"></span>
+                                <span className="text-slate-700 text-xs sm:text-sm font-bold bg-amber-50 px-2 py-0.5 rounded border border-amber-100">إشراف: أ/ إسلام سعود</span>
+                             </div>
+
+                             <span className="w-1/4 text-left dir-ltr">{progress}%</span>
+                        </div>
+                        <div className="h-3 w-full bg-white/50 rounded-full overflow-hidden border border-white/30">
+                            <div className="h-full bg-blue-600 transition-all duration-500 ease-out rounded-full" style={{ width: `${progress}%` }}></div>
+                        </div>
+                    </div>
+
+                    <div className="glass-card w-full max-w-3xl p-6 md:p-8 rounded-3xl shadow-xl animate-fade-in">
+                        {currentQ.type === 'mcq' ? (
+                            <>
+                                <span className="text-xs font-bold bg-blue-100 text-blue-700 px-2 py-1 rounded mb-4 inline-block">اختر الإجابة الصحيحة</span>
+                                <QuestionText text={currentQ.question} />
+
+                                <div className="space-y-3">
+                                    {currentQ.options.map((option, idx) => {
+                                        const ansState = mcqAnswers[currentQuestionIndex];
+                                        const isAnswered = !!ansState;
+                                        let btnClass = "w-full p-4 rounded-xl text-right font-semibold border-2 transition-all relative overflow-hidden ";
+                                        
+                                        if (isAnswered) {
+                                            const isSelected = ansState.selected === option;
+                                            const isCorrectOption = option === currentQ.correctAnswer;
+                                            if (isSelected) {
+                                                btnClass += isCorrectOption ? "bg-green-100 border-green-500 text-green-800" : "bg-red-100 border-red-500 text-red-800";
+                                            } else {
+                                                btnClass += "bg-white/50 border-transparent text-slate-400 opacity-60";
+                                            }
+                                        } else {
+                                            btnClass += "bg-white hover:bg-blue-50 border-slate-200 hover:border-blue-300 text-slate-700 cursor-pointer active:scale-[0.99]";
+                                        }
+
+                                        return (
+                                            <button key={idx} onClick={() => handleMcqOptionClick(option)} disabled={isAnswered} className={btnClass}>
+                                                <div className="flex items-center justify-between">
+                                                    <span>{option}</span>
+                                                    {isAnswered && ansState.selected === option && (option === currentQ.correctAnswer ? <span className="text-green-600"><Icons.Check /></span> : <span className="text-red-600"><Icons.X /></span>)}
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                {mcqAnswers[currentQuestionIndex] && !mcqAnswers[currentQuestionIndex].isCorrect && (
+                                    <div className="mt-6 p-4 bg-red-50 border-r-4 border-red-500 rounded-lg animate-fade-in">
+                                        <h4 className="font-bold text-red-800 mb-1 flex items-center gap-2"><Icons.X /> إجابة خاطئة!</h4>
+                                        <p className="text-indigo-700/90 text-sm font-medium leading-relaxed"><span className="font-bold text-indigo-900">التفسير:</span> {currentQ.rationale}</p>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <>
+                                <span className="text-xs font-bold bg-purple-100 text-purple-700 px-2 py-1 rounded mb-4 inline-block">سؤال مقالي</span>
+                                <QuestionText text={currentQ.question} />
+                                
+                                <div className="mb-6">
+                                    <textarea 
+                                        className="w-full p-4 rounded-xl border-2 border-slate-200 focus:border-purple-500 focus:ring-0 outline-none min-h-[120px] text-slate-700 font-medium bg-white/50"
+                                        placeholder="اكتب إجابتك هنا..."
+                                        disabled={showEssayModel}
+                                        onChange={(e) => setEssayAnswers(prev => ({...prev, [currentQuestionIndex]: e.target.value}))}
+                                        value={essayAnswers[currentQuestionIndex] || ''}
+                                    ></textarea>
+                                </div>
+
+                                {!showEssayModel && (
+                                    <button onClick={handleEssaySubmit} className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-lg shadow transition-all">
+                                        تسليم الإجابة
+                                    </button>
+                                )}
+
+                                {showEssayModel && (
+                                    <div className="mt-6 p-5 bg-green-50 border-r-4 border-green-500 rounded-lg animate-fade-in">
+                                        <h4 className="font-bold text-green-800 mb-2 flex items-center gap-2"><Icons.FileText /> الإجابة النموذجية:</h4>
+                                        <p className="text-green-800/90 font-medium leading-relaxed">{currentQ.modelAnswer}</p>
+                                    </div>
+                                )}
+                            </>
+                        )}
+
+                        <div className="mt-8 flex justify-end items-center pt-4 border-t border-slate-100" ref={nextButtonRef}>
+                            {(currentQ.type === 'mcq' ? !!mcqAnswers[currentQuestionIndex] : showEssayModel) && (
+                                <button onClick={handleNext} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 inline-flex items-center gap-2 animate-fade-in">
+                                    {isLastQuestion ? "إنهاء الاختبار" : "التالي"} <Icons.ChevronLeft />
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const Result = ({ score, total, studentName, onRetry, onDashboard }) => {
+            const percentage = Math.round((score / total) * 100);
+            let message = percentage >= 90 ? "ممتاز يا بطل! أداء استثنائي 🌟" : percentage >= 75 ? "جيد جداً! أنت رائع 💪" : percentage >= 50 ? "جيد، ولكن يمكنك تحقيق الأفضل 👍" : "حاول مرة أخرى، لا تستسلم! 🌱";
+            let colorClass = percentage >= 90 ? "text-green-600" : percentage >= 75 ? "text-blue-600" : percentage >= 50 ? "text-yellow-600" : "text-red-600";
+
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[80vh] w-full px-4 animate-fade-in relative z-10">
+                    <HeaderLogo />
+                    <div className="glass-card p-8 md:p-12 rounded-3xl w-full max-w-lg text-center shadow-2xl relative overflow-hidden">
+                        {percentage >= 75 && <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-400 via-blue-500 to-purple-500"></div>}
+                        <h2 className="text-3xl font-bold text-slate-800 mb-2">نتيجة الاختبار</h2>
+                        <p className="text-lg text-slate-500 font-semibold mb-8">الطالب: <span className="text-blue-700">{studentName}</span></p>
+
+                        <div className="relative inline-block mb-8">
+                            <svg viewBox="0 0 36 36" className="w-40 h-40 circular-chart text-blue-600">
+                                <path className="circle-bg stroke-slate-200" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" strokeWidth="3" />
+                                <path className={`circle stroke-current ${percentage < 50 ? 'text-red-500' : percentage < 75 ? 'text-yellow-500' : 'text-green-500'}`} strokeDasharray={`${percentage}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" strokeWidth="3" strokeLinecap="round" />
+                            </svg>
+                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+                                <div className="text-4xl font-black text-slate-800">{score}<span className="text-xl text-slate-400">/{total}</span></div>
+                                <div className="text-xs text-slate-400 font-bold mt-1">(MCQ فقط)</div>
+                            </div>
+                        </div>
+
+                        <div className={`text-xl font-bold mb-4 ${colorClass}`}>{message}</div>
+                        <p className="text-sm text-slate-500 mb-8 bg-slate-50 p-2 rounded border border-slate-100">تم تسجيل الأسئلة المقالية للمراجعة الذاتية.</p>
+
+                        <div className="flex flex-col gap-3">
+                            <button onClick={onRetry} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                                <Icons.RotateCcw /> إعادة المحاولة
+                            </button>
+                            <button onClick={onDashboard} className="w-full bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2">
+                                <Icons.Layout /> العودة للوحدات
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [view, setView] = useState('home');
+            const [studentName, setStudentName] = useState("");
+            const [activeLesson, setActiveLesson] = useState(null);
+            const [score, setScore] = useState(0);
+            const [lessonTotal, setLessonTotal] = useState(0);
+            const [completedLessons, setCompletedLessons] = useState([]);
+            const [isFullscreen, setIsFullscreen] = useState(false);
+            
+            const STORAGE_KEY = 'alkanz_completed_lessons_v3';
+
+            useEffect(() => {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    setCompletedLessons(JSON.parse(saved));
+                }
+            }, []);
+
+            const toggleFullscreen = () => {
+                try {
+                    if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen();
+                        setIsFullscreen(true);
+                    } else {
+                        if (document.exitFullscreen) {
+                            document.exitFullscreen();
+                            setIsFullscreen(false);
+                        }
+                    }
+                } catch (err) {
+                    alert("يرجى استخدام زر ملء الشاشة الخاص بالمتصفح (F11)");
+                }
+            };
+
+            const startApp = (name) => {
+                setStudentName(name);
+                setView('dashboard');
+            };
+
+            const logoutApp = () => {
+                setStudentName("");
+                setView('home');
+            }
+
+            const selectLesson = (lesson) => {
+                setActiveLesson(lesson);
+                setView('quiz');
+            };
+
+            const finishQuiz = (finalScore, totalQuestions) => {
+                setScore(finalScore);
+                setLessonTotal(totalQuestions);
+                
+                if (!completedLessons.includes(activeLesson.id)) {
+                    const newCompleted = [...completedLessons, activeLesson.id];
+                    setCompletedLessons(newCompleted);
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(newCompleted));
+                }
+                
+                setView('result');
+            };
+
+            const retryQuiz = () => {
+                setScore(0);
+                setView('quiz');
+            };
+
+            const goDashboard = () => {
+                setScore(0);
+                setView('dashboard');
+            };
+
+            return (
+                <div className="relative min-h-screen">
+                    <Watermark />
+                    {/* Fixed Top Bar */}
+                    <div className="fixed top-0 left-0 w-full p-4 z-50 flex justify-between items-center bg-white/80 backdrop-blur-md shadow-sm border-b border-slate-200">
+                        {/* Right Side: Empty in this version as Logo is in-flow */}
+                        <div></div>
+
+                        <div className="pointer-events-auto flex gap-2">
+                            <button onClick={toggleFullscreen} className="bg-white text-slate-700 p-2 rounded-xl shadow-sm hover:bg-slate-50 transition-all border border-slate-200" title="ملء الشاشة">
+                                {isFullscreen ? <Icons.Minimize /> : <Icons.Maximize />}
+                            </button>
+                            {/* Logout Button REMOVED as requested "ازالة الخروج الي في اعلي اليسار" */}
+                        </div>
+                    </div>
+
+                    {view === 'blocked' && <BlockedScreen />}
+                    {view === 'home' && <Home onStart={startApp} />}
+                    {view === 'dashboard' && <Dashboard studentName={studentName} completedLessons={completedLessons} onSelectLesson={selectLesson} />}
+                    {view === 'quiz' && <Quiz lesson={activeLesson} onFinish={finishQuiz} onBack={goDashboard} />}
+                    {view === 'result' && <Result score={score} total={lessonTotal} studentName={studentName} onRetry={retryQuiz} onDashboard={goDashboard} />}
+                    
+                    <div className="fixed bottom-4 w-full text-center text-slate-400 text-xs font-semibold z-0">
+                        تصميم وتطوير: أ/ إسلام سعود
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
